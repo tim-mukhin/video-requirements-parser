@@ -1,0 +1,27 @@
+{
+  "name": "video-requirements-parser",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "studio": "remotion studio synth/index.ts",
+    "build": "node --experimental-strip-types --no-warnings synth/tools/build.ts",
+    "lines": "node --experimental-strip-types --no-warnings synth/tools/lines.ts",
+    "typecheck": "tsc --noEmit",
+    "stills": "node --experimental-strip-types --no-warnings synth/tools/stills.ts"
+  },
+  "dependencies": {
+    "@remotion/bundler": "4.0.421",
+    "@remotion/cli": "4.0.421",
+    "@remotion/google-fonts": "4.0.421",
+    "@remotion/renderer": "4.0.421",
+    "pptxgenjs": "^3.12.0",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "remotion": "4.0.421"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.2.0",
+    "typescript": "5.9.3"
+  }
+}

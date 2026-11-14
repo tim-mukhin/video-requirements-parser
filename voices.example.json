@@ -1,0 +1,13 @@
+{
+  "en_artem": {
+    "ref_audio": "/path/to/out/refs/en_artem.wav",
+    "ref_text": "/path/to/out/refs/en_artem.txt",
+    "source": "/path/to/long_recording.wav",
+    "lang": "en"
+  },
+  "artem": {
+    "ref_audio": "/path/to/reference.wav",
+    "ref_text": "/path/to/reference.txt",
+    "lang": "ru"
+  }
+}

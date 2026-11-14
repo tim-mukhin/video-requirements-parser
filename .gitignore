@@ -1,0 +1,7 @@
+node_modules/
+out/
+voices.local.json
+.DS_Store
+parse/.venv/
+__pycache__/
+.env.local
