@@ -59,6 +59,9 @@ export type BugTruth = {
   // sys/act/say step names the parser must find
   critical: string[];
   traps?: string[];
+  // what the cross-pass checks must flag, at a step name: an error on screen nobody mentions, a value that returned
+  // by itself, a change in a window covered by the front one, a claim the video does not show
+  checks?: { kind: 'unmentioned' | 'revert' | 'covered' | 'claim'; at: string }[];
 };
 
 export type ReqStatus = 'stated' | 'proposed' | 'decided' | 'rejected' | 'open_question';

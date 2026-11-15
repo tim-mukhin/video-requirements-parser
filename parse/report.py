@@ -6,6 +6,8 @@ import html
 import json
 from pathlib import Path
 
+from evaluate import chk
+
 OUT = Path(__file__).resolve().parents[1] / "out"
 LANG_NAMES = {"en": "English", "ru": "Russian"}
 
@@ -33,10 +35,10 @@ for lang in sorted({p.parts[-3] for p in OUT.glob("*/*/manifest.json")}):
         d = m["difficulty"]
         rows.append(
             f"<tr><td><b>{man.parent.name}</b><br><span>{html.escape(m['title'])}</span></td><td>{m.get('device', 'desktop')}<br>{d['speech']}, {d['signal']['kind']}</td>"
-            f"<td>{variants}</td><td>{' · '.join(filter(None, links))}</td><td>{crit}</td><td>{pct(r.get('recall'))}</td><td>{pct(r.get('precision'))}</td><td>{pct(r.get('clicks'))}</td><td>{pct(r.get('hovers'))}</td><td>{pct(r.get('screen_text'))}</td><td>{pct(r.get('links'))}</td><td>{pct(r.get('speakers'))}</td><td>{pct(r.get('slides'))}</td><td>{pct(r.get('files'))}</td><td>{pct(r.get('wer'))}</td></tr>"
+            f"<td>{variants}</td><td>{' · '.join(filter(None, links))}</td><td>{crit}</td><td>{pct(r.get('recall'))}</td><td>{pct(r.get('precision'))}</td><td>{pct(r.get('clicks'))}</td><td>{pct(r.get('hovers'))}</td><td>{pct(r.get('screen_text'))}</td><td>{pct(r.get('links'))}</td><td>{pct(r.get('speakers'))}</td><td>{pct(r.get('slides'))}</td><td>{pct(r.get('files'))}</td><td>{chk(r) if 'checks_total' in r else '-'}</td><td>{pct(r.get('wer'))}</td></tr>"
         )
     sections.append(
-        f"<h2>{LANG_NAMES.get(lang, lang)}</h2><table><tr><th>Scenario</th><th>Kind</th><th>Video</th><th>Timelines</th><th>Critical</th><th>Recall</th><th>Precision</th><th>Clicks</th><th>Hovers</th><th>Screen text</th><th>Links</th><th>Speakers</th><th>Slides</th><th>Files</th><th>WER</th></tr>{''.join(rows)}</table>"
+        f"<h2>{LANG_NAMES.get(lang, lang)}</h2><table><tr><th>Scenario</th><th>Kind</th><th>Video</th><th>Timelines</th><th>Critical</th><th>Recall</th><th>Precision</th><th>Clicks</th><th>Hovers</th><th>Screen text</th><th>Links</th><th>Speakers</th><th>Slides</th><th>Files</th><th>Checks</th><th>WER</th></tr>{''.join(rows)}</table>"
     )
 
 page = f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><title>video-requirements-parser</title><style>

@@ -92,6 +92,9 @@ def link_text(ln: dict) -> str:
     return f'↳ "{ln["phrase"]}" {rel} {tgt}'
 
 
+CHECK = {"unmentioned": "ERROR NOBODY MENTIONS", "revert": "WENT BACK BY ITSELF", "covered": "CHANGED BEHIND THE FRONT WINDOW", "claim": "CLAIM NOT SHOWN"}
+
+
 def render_md(evidence: dict, title: str) -> str:
     v = evidence["video"]
     lines = [
@@ -101,9 +104,12 @@ def render_md(evidence: dict, title: str) -> str:
         f"Screen states: {len(evidence['screens'])}, events: {len(evidence['events'])}, utterances: {len(evidence['speech']['utterances'])}.",
         "Time is from the start of the video. Square brackets hold event ids from evidence.json, then the evidence frame.",
         "",
-        "## Timeline",
-        "",
     ]
+    if evidence.get("checks"):
+        lines += ["## Cross-checks", "", "Facts that show only when speech, screen and windows are put side by side.", ""]
+        lines += [f'{ts(c["t_ms"])}  {CHECK[c["kind"]]}: {c["text"]}  [{", ".join(c["refs"])}]' for c in evidence["checks"]]
+        lines.append("")
+    lines += ["## Timeline", ""]
     by_utt: dict[str, list[dict]] = {}
     for ln in evidence.get("links", []):
         by_utt.setdefault(ln["utterance"], []).append(ln)
@@ -205,6 +211,8 @@ def render_html(evidence: dict, title: str, video_src: str) -> str:
         if s.get("frame")
     )
     extra = ""
+    if evidence.get("checks"):
+        extra += "<h3>Cross-checks</h3>" + "".join(f'<div class="sl" data-t="{c["t_ms"]}">{ts(c["t_ms"])} · <b>{CHECK[c["kind"]]}</b> {esc(c["text"])}</div>' for c in evidence["checks"])
     if evidence.get("slides"):
         extra += "<h3>Slides on screen</h3>" + "".join(f'<div class="sl" data-t="{sl["start_ms"]}">{ts(sl["start_ms"])}-{ts(sl["end_ms"])} · slide {sl["index"]}: {esc(sl["title"])}</div>' for sl in evidence["slides"])
     for a in evidence.get("attachments") or []:

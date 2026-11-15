@@ -76,6 +76,7 @@ export const w1 = (lang: Lang): Scenario => {
         'PATCH /api/files/q3/sharing возвращает 403 (tenant policy blocks anonymous links), в консоли ошибка. Интерфейс при этом показывает тост «Настройки доступа сохранены», режим возвращается на «Только приглашённые».',
       ),
       critical: ['save', 'patch-403', 'console-403', 'saved', 'reopen'],
+      checks: [{ kind: 'unmentioned', at: 'patch-403' }, { kind: 'revert', at: 'revert' }],
       traps: [
         t(
           'the cause is visible only in the open DevTools panel at the bottom of the window, the speech never mentions it',

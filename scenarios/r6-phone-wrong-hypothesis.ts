@@ -52,6 +52,7 @@ export const r6 = (lang: Lang): Scenario => {
         `«${budget.name}» (${budget.size}) доходит до 55% и становится «Не отправлено». «${shot.name}» (${shot.size}) отправляется и доставляется.`,
       ),
       critical: ['send1', 'fail1', 'send2', 'ok2'],
+      checks: [{ kind: 'claim', at: 'hypothesis' }, { kind: 'claim', at: 'conclusion' }],
       traps: [
         t(
           `The author's conclusion "the file was too big" is contradicted by the screen: the picture that went through (${shot.size}) is bigger than the file that failed (${budget.size})`,

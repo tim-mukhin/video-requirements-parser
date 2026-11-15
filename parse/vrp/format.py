@@ -149,6 +149,16 @@ class Findings(TypedDict):
     requirements: NotRequired[list[Requirement]]
 
 
+class Check(TypedDict):
+    """A fact across passes: an error on screen nobody mentions, a value that went back by itself, a change in a window
+    covered by the front one, a claim in speech that nothing on screen shows."""
+    kind: Literal["unmentioned", "revert", "covered", "claim"]
+    t_ms: int
+    end_ms: NotRequired[int]
+    text: str
+    refs: list[str]  # event and utterance ids
+
+
 class Speech(TypedDict):
     speakers: list[Speaker]
     utterances: list[Utterance]
@@ -163,4 +173,5 @@ class Evidence(TypedDict):
     events: list[Event]
     links: list[Link]
     slides: list[SlideShown]
+    checks: list[Check]
     findings: Findings

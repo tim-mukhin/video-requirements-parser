@@ -68,6 +68,7 @@ export const b7 = (lang: Lang): Scenario => {
         'Vault показывает «Приглашение отправлено» и добавляет marko@fabrikam.com в список. Одновременно в перекрытом окне Relay - Contoso чат Relay Bot поднимается наверх с непрочитанным: «Не удалось отправить приглашение marko@fabrikam.com: внешние приглашения отключены». Автор видео это не замечает; у Марко ничего нет.',
       ),
       critical: ['invite', 'save', 'sent', 'bot-error', 'peer'],
+      checks: [{ kind: 'unmentioned', at: 'bot-error' }, { kind: 'covered', at: 'bot-error' }],
       traps: [
         t(
           'the error is visible only in the sidebar of a window covered by the Vault window, and it is cut off with an ellipsis',

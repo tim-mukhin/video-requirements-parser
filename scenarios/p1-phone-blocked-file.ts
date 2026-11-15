@@ -40,6 +40,7 @@ export const p1 = (lang: Lang): Scenario => {
         'Файл приходит с замком и подписью «Файл недоступен»; при нажатии - системное окно «Файл недоступен» со ссылкой на политику Contoso.',
       ),
       critical: ['banner', 'arrive', 'open'],
+      checks: [{ kind: 'claim', at: 'seen' }],
       traps: [t('"Same thing on the computer" is a claim that is not shown; the video shows only the phone', '«с компьютера то же самое» - утверждение без показа, на видео только телефон')],
     },
     difficulty: { speech: 'explicit', signal: { kind: 'modal' }, windows: 1, occluded: false, distractors: [], attempts: 'once' },

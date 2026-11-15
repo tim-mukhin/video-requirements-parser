@@ -76,6 +76,7 @@ export const r4 = (lang: Lang): Scenario => {
         `У отправителя «${name}», у получателя тот же файл называется «${mojibake(name)}». Получатель спрашивает, как называется файл, потому что не находит его в загрузках.`,
       ),
       critical: ['claim', 'theirs'],
+      checks: [{ kind: 'claim', at: 'claim' }, { kind: 'claim', at: 'guess' }],
       traps: [
         t(
           'The author does not notice the broken name and does not say it aloud: the cause has to be seen by comparing the text in the two windows',

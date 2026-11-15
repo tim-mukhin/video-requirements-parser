@@ -15,6 +15,8 @@ Metrics:
   files      - attached pdf/pptx: share of files where the parser finds exactly the slides that differ from the screen;
   speakers   - meetings: share of utterances attributed to the right tile;
   links      - "right here", "this one", a click while saying "send": share of ground-truth links found;
+  checks     - cross-checks from the bug markup (an error nobody mentions, a value that went back, a change behind the
+               front window, a claim the video does not show): found / marked, then flags with no mark (+n);
   screen_text- share of the texts of every ground-truth screen state found in the parser state at the same moment,
                weighted by how long the state lasts: this is where facts that never change show up (a garbled name).
 """
@@ -187,6 +189,29 @@ def screen_text(truth: dict, pred: dict) -> float | None:
     return num / den if den else None
 
 
+def checks_score(sid: str, pred: dict) -> dict:
+    """A mark is found by a flag of its kind at the same moment (a claim: during its line)."""
+    rep = OUT / sid / "truth" / "report.json"
+    marks = json.loads(rep.read_text()).get("checks", []) if rep.exists() else []
+    flags = pred.get("checks", [])
+    if not pred["speech"]["utterances"]:  # parsed without speech: only the checks that need none
+        marks = [m for m in marks if m["kind"] in ("revert", "covered")]
+
+    def hit(m: dict, f: dict) -> bool:
+        if m["kind"] != f["kind"]:
+            return False
+        if m["kind"] == "claim":
+            return f["t_ms"] <= m["end_ms"] + 500 and f.get("end_ms", f["t_ms"]) >= m["t_ms"] - 500
+        return abs(f["t_ms"] - m["t_ms"]) <= 1000
+
+    return {
+        "checks_found": sum(any(hit(m, f) for f in flags) for m in marks),
+        "checks_total": len(marks),
+        "checks_missed": [f'{m["kind"]}:{m["name"]}' for m in marks if not any(hit(m, f) for f in flags)],
+        "checks_extra": [f'{f["kind"]}@{f["t_ms"]}: {f["text"][:80]}' for f in flags if not any(hit(m, f) for m in marks)],
+    }
+
+
 def evaluate(sid: str, variant: str | None) -> dict:
     truth = json.loads((OUT / sid / "truth" / "evidence.json").read_text())
     pred = json.loads((OUT / sid / (f"parsed-{variant}" if variant else "parsed") / "evidence.json").read_text())
@@ -244,9 +269,16 @@ def evaluate(sid: str, variant: str | None) -> dict:
         "speakers": speakers_score(truth, pred),
         "slides": slides_score(sid, pred)[0],
         "files": slides_score(sid, pred)[1],
+        **checks_score(sid, pred),
         "missed": [{"t_ms": e["t_ms"], "kind": e["kind"], "text": e["text"][:70]} for e in visible if e not in found],
         "missed_clicks": [{"t_ms": e["t_ms"], "text": e["text"]} for e in t_clicks if not hit_cursor(e, pev)],
     }
+
+
+def chk(r: dict) -> str:
+    if not r["checks_total"] and not r["checks_extra"]:
+        return "-"
+    return f'{r["checks_found"]}/{r["checks_total"]}' + (f'+{len(r["checks_extra"])}' if r["checks_extra"] else "")
 
 
 def pct(x):
@@ -261,11 +293,12 @@ if __name__ == "__main__":
     suffix = f"parsed-{a.variant}" if a.variant else "parsed"
     ids = a.ids or sorted(f"{p.parts[-4]}/{p.parts[-3]}" for p in OUT.glob(f"*/*/{suffix}/evidence.json"))
     rows = [evaluate(s, a.variant) for s in ids]
-    print(f"{'scenario':33} {'WER':>5} {'crit.':>7} {'recall':>6} {'prec':>6} {'clicks':>6} {'c.prec':>6} {'hover':>6} {'text':>6} {'links':>6} {'spkr':>6} {'slides':>6} {'files':>6}  not on screen")
+    print(f"{'scenario':33} {'WER':>5} {'crit.':>7} {'recall':>6} {'prec':>6} {'clicks':>6} {'c.prec':>6} {'hover':>6} {'text':>6} {'links':>6} {'spkr':>6} {'slides':>6} {'files':>6} {'checks':>7}  not on screen")
     for r in rows:
-        print(f"{r['id']:33} {pct(r['wer'])} {r['critical_found']:>3}/{r['critical_total']:<3} {pct(r['recall'])} {pct(r['precision'])} {pct(r['clicks'])} {pct(r['click_precision'])} {pct(r['hovers'])} {pct(r['screen_text'])} {pct(r['links'])} {pct(r['speakers'])} {pct(r['slides'])} {pct(r['files'])}  {', '.join(r['not_on_screen'])}")
+        print(f"{r['id']:33} {pct(r['wer'])} {r['critical_found']:>3}/{r['critical_total']:<3} {pct(r['recall'])} {pct(r['precision'])} {pct(r['clicks'])} {pct(r['click_precision'])} {pct(r['hovers'])} {pct(r['screen_text'])} {pct(r['links'])} {pct(r['speakers'])} {pct(r['slides'])} {pct(r['files'])} {chk(r):>7}  {', '.join(r['not_on_screen'])}")
     tot_f, tot_t = sum(r["critical_found"] for r in rows), sum(r["critical_total"] for r in rows)
     print(f"{'critical total':33} {'':5} {tot_f:>3}/{tot_t:<3}")
+    print(f"{'checks total':33} {sum(r['checks_found'] for r in rows)}/{sum(r['checks_total'] for r in rows)}, flags with no mark: {sum(len(r['checks_extra']) for r in rows)}")
     # merge into the stored results so evaluating a few scenarios does not drop the others
     path = OUT / f"_eval{'-' + a.variant if a.variant else ''}.json"
     stored = {r["id"]: r for r in json.loads(path.read_text())} if path.exists() else {}

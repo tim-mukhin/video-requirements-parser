@@ -44,6 +44,7 @@ export const p2 = (lang: Lang): Scenario => {
         'Загрузка доходит до 62%, сообщение становится «Не отправлено» с кнопкой «Повторить»; после повтора загрузка до 41% и снова «Не отправлено».',
       ),
       critical: ['send', 'fail1', 'retry', 'fail2'],
+      checks: [{ kind: 'claim', at: 'network-claim' }, { kind: 'claim', at: 'scope' }],
       traps: [t('"The connection is fine" and "inside Contoso everything goes through" are claims that are not shown', '«связь нормальная» и «внутри Contoso всё уходит» - утверждения без показа')],
     },
     difficulty: { speech: 'explicit', signal: { kind: 'inline' }, windows: 1, occluded: false, distractors: [], attempts: 'intermittent' },

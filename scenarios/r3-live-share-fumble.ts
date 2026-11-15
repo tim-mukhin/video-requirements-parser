@@ -43,6 +43,7 @@ export const r3 = (lang: Lang): Scenario => {
         'Для «Отчёт_Q3.pdf» выбран режим «Все, у кого есть ссылка», «Сохранить», тост «Настройки доступа сохранены»; через секунду значок в списке возвращается на «личный», при повторном открытии режим «Только приглашённые».',
       ),
       critical: ['pick', 'save', 'revert', 'reopen'],
+      checks: [{ kind: 'revert', at: 'revert' }],
       traps: [
         t('The wrong file (Budget_2027.xlsx) is selected first, this is not part of the repro', 'сначала выбран не тот файл (Бюджет_2027.xlsx), это не часть репро'),
         t('Hovering over "Anyone at Contoso" without a click is not a selection', 'наведение на «Все в Contoso» без клика - не выбор'),

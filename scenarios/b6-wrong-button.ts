@@ -47,6 +47,7 @@ export const b6 = (lang: Lang): Scenario => {
         'Курсор нажал соседнюю кнопку «Запланировать отправку» (часы), сообщение запланировано на 18:00 и показано с отметкой «в 18:00». Это ожидаемое поведение.',
       ),
       critical: ['press', 'claim'],
+      checks: [{ kind: 'claim', at: 'complaint' }],
       traps: [
         t(
           'the speech says "Send", the click is on "Schedule send": the correct conclusion is user error, not a bug',

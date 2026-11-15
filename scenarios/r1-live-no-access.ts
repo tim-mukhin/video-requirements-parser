@@ -46,6 +46,7 @@ export const r1 = (lang: Lang): Scenario => {
         'У отправителя файл «Отчёт_Q3.pdf» с отметкой «отправлено». Получатель Марко Петрович отвечает текстом «Не открывается, пишет нет доступа». Окна получателя на видео нет.',
       ),
       critical: ['send', 'reply'],
+      checks: [{ kind: 'claim', at: 'end' }],
       traps: [
         t(
           'That Diego is from another organization is visible only from the "external" label and the banner "This chat includes people from another organization (Fabrikam)"; it is not said aloud',

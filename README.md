@@ -51,7 +51,8 @@ steps: [
   `type` (typing character by character).
 - `sys` - a system reaction: what changed on screen without the user (a toast, a status, an incoming message, a setting
   silently reverting). `at` - the anchor the delay counts from, `ms` - when the effect goes away.
-- `bug` - what the parser must find: bug class, expected and actual, critical moments, traps.
+- `bug` - what the parser must find: bug class, expected and actual, critical moments, traps, and `checks` - what the
+  cross-checks must flag (`unmentioned`, `revert`, `covered`, `claim` at a step name).
 - `requirements` - for meetings: requirements with status `stated`, `proposed`, `decided`, `rejected`,
   `open_question`, who proposed, who decided, which utterances they rest on.
 - `decks`, `attachments` - slides and files attached to the video; `overrides` makes an attached file differ from what
@@ -132,8 +133,10 @@ out/<lang>/<id>/parsed/
   70-links.json     what a phrase refers to on the screen ("this one", "right here", "I click send")
   80-speakers.json  meetings: participant tiles and the tile lit during each utterance
   90-slides.json    which slide was on screen when; how attached pdf/pptx differ from what was shown
+  95-checks.json    cross-checks: an error nobody mentions, a value that went back, a change behind the front window,
+                    claims the video does not show
   evidence.json     everything together, format in parse/vrp/format.py
-  timeline.md       timeline for an agent: time, event, id, evidence frame
+  timeline.md       timeline for an agent: cross-checks first, then time, event, id, evidence frame
   timeline.html     the same with the video, a screen-state strip and cut-outs
 ```
 
@@ -171,7 +174,12 @@ What was seen stays apart from what was inferred: every event has a source (`ocr
   caption is read once, every utterance gets the tile lit during it (a room tile gives the room; a person in it is named
   only when they introduce themselves);
 - **slides** - the slide number on screen ("3 / 6", "Slide 3 of 6") gives which slide was shown when, returns
-  included; the words of the slide (title down to the footer) are compared with each page of the attached pdf and pptx.
+  included; the words of the slide (title down to the footer) are compared with each page of the attached pdf and pptx;
+- **cross-checks** - what no single pass sees: an error text on screen with nothing like it said around it (a 0.3 s
+  toast, a 403 in DevTools); a short value that went back to what it was a moment ago with no click since it changed
+  (access "link" → "private"); a change in a window partly covered by the front one (found by the title-bar buttons:
+  coloured on the front window, grey on the others); a sentence with a claim marker ("maybe", "used to", "he says",
+  "on the computer") that no text on screen around it backs. Claims are skipped in meetings, where "maybe" is a proposal.
 
 Next: recognising app screens and returns to them beyond slides, telling apart people in one room tile by voice.
 
@@ -180,6 +188,10 @@ Known limitations:
 - **480p** - small text is read with errors and the cursor jitters, so clicks there are unreliable; 720p and up is the
   target.
 - **People in one room tile** - only the one who introduces themselves gets a name; the others stay "the room".
+- **Speech against an icon** - "I click Send" while the clock icon next to it is clicked (B6): the button has no text on
+  screen, so no cheap check sees the mismatch; the evidence frame of the click is there for a model to look at.
+- **Claims without a marker** - "the connection is fine, websites open" is a claim about something off screen, but it
+  has no word that gives it away; a word list does not find it.
 - **Links that need meaning** - "here as well" that refers back to an earlier phrase, or "this one" said while clicking
   something else, are not resolved by the rules above.
 - **Ground truth of icon buttons** - the generator records the label of an icon button (Attach, Send) as its text,
@@ -187,8 +199,12 @@ Known limitations:
 
 The evaluator (`evaluate.py`) reports: critical moments of the scenario, recall and precision of screen changes,
 clicks (time and place), hovers, screen text (share of on-screen texts read at the right moment, this is where facts
-that never change show up, like a garbled file name), links, speakers, slides, attached files and the word error rate
-of the speech.
+that never change show up, like a garbled file name), links, speakers, slides, attached files, cross-checks (marks in
+the scenario's `bug.checks` found, plus flags with no mark) and the word error rate of the speech.
+
+Ground-truth markup that does not change the video (`bug.checks`, `critical`, names of steps) is rewritten without
+rendering: `node --experimental-strip-types synth/tools/truth.ts <key> ...` takes the DOM snapshot from `props.json`
+and refuses if the scenario's timing no longer matches the rendered video.
 
 ## Scenarios
 

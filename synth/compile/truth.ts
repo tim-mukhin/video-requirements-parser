@@ -182,6 +182,7 @@ export function truth(sc: Scenario, tl: Timeline, layout: Layout) {
     actual: sc.bug.actual,
     critical: sc.bug.critical.map(ref),
     traps: sc.bug.traps ?? [],
+    checks: (sc.bug.checks ?? []).map((c) => ({ kind: c.kind, ...ref(c.at) })),
   };
 
   const requirements = sc.requirements?.map((r) => ({ ...r, evidence: r.evidence.map(ref) }));

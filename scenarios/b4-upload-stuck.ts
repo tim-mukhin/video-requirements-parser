@@ -77,6 +77,7 @@ export const b4 = (lang: Lang): Scenario => {
         'Первый файл (Бюджет_2027.xlsx) загружен и доставлен. Второй (Отчёт_Q3.pdf) дошёл до 99% и дальше не меняется; получателю не пришёл.',
       ),
       critical: ['send1', 'arrive1', 'send2', 'stuck'],
+      checks: [{ kind: 'claim', at: 'pattern' }],
       traps: [
         t(
           '"every other time" is a claim from the speech, the video shows only one pair of attempts',

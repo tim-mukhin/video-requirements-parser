@@ -29,7 +29,7 @@ export const r2 = (lang: Lang): Scenario => {
       { sys: 'a', op: { status: { msg: 's1', to: 'sent' } }, at: 'send1', delay: 0.6 },
       { sys: 'a', op: toast, at: 'send1', delay: 0.9, ms: 300, name: 'toast1' },
       { act: { move: [1200, 480] } },
-      { say: t("Went through, I think. There's a check mark.", 'Ушло вроде. Галочка есть.') },
+      { say: t("Went through, I think. There's a check mark.", 'Ушло вроде. Галочка есть.'), name: 'think' },
       { wait: 1.5 },
       { say: t('But he says nothing came. Hang on, once more.', 'А он говорит, ничего не пришло. Щас ещё раз.'), name: 'claim' },
       { act: { click: 'a/attach' } },
@@ -62,6 +62,7 @@ export const r2 = (lang: Lang): Scenario => {
         'Обе отправки «Отчёт_Q3.pdf» получают отметку «отправлено», после каждой на 0,3 с появляется тост «Не удалось доставить: получатель во внешней организации». Автор тост не замечает и о нём не говорит.',
       ),
       critical: ['send1', 'toast1', 'send2', 'toast2'],
+      checks: [{ kind: 'unmentioned', at: 'toast1' }, { kind: 'unmentioned', at: 'toast2' }, { kind: 'claim', at: 'think' }, { kind: 'claim', at: 'claim' }, { kind: 'claim', at: 'guess' }],
       traps: [
         t('Neither toast is mentioned aloud', 'оба тоста голосом не упомянуты'),
         t('The calendar notification is unrelated to the bug', 'уведомление календаря не связано с багом'),

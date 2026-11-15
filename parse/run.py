@@ -10,6 +10,7 @@ out/<lang>/<id>/parsed[-variant]/
   70-links.json     what a phrase refers to on the screen
   80-speakers.json  meeting tiles and who spoke: the lit tile during each utterance
   90-slides.json    which slide was on screen when; how attached pdf/pptx differ from what was shown
+  95-checks.json    cross-checks: an error nobody mentions, a value that went back, a change behind the front window, claims
   evidence.json     everything together, for machines
   timeline.md       timeline for an agent
   timeline.html     timeline with frames, for a human
@@ -22,6 +23,7 @@ import json
 import time
 from pathlib import Path
 
+from vrp import checks as checks_pass
 from vrp import events as ev_pass
 from vrp import links as links_pass
 from vrp import slides as slides_pass
@@ -31,8 +33,8 @@ from vrp.format import SCHEMA
 from vrp.timeline import crops, render_html, render_md
 
 OUT = Path(__file__).resolve().parents[1] / "out"
-FILES = {"speech": "10-speech.json", "screens": "30-screens.json", "events": "60-events.json", "links": "70-links.json", "speakers": "80-speakers.json", "slides": "90-slides.json"}
-VERSIONS = {"speech": 2, "screens": 7, "events": 22, "links": 4, "speakers": 1, "slides": 2}
+FILES = {"speech": "10-speech.json", "screens": "30-screens.json", "events": "60-events.json", "links": "70-links.json", "speakers": "80-speakers.json", "slides": "90-slides.json", "checks": "95-checks.json"}
+VERSIONS = {"speech": 2, "screens": 7, "events": 22, "links": 4, "speakers": 1, "slides": 2, "checks": 5}
 
 
 def sha(path: Path) -> str:
@@ -145,6 +147,7 @@ def run(key: str, variant: str | None, force: set[str], no_speech: bool = False)
     sl = step("slides", passes["screens"]["key"] + "|" + ",".join(f.name for f in attached), slides)
     evidence["slides"], evidence["attachments"] = sl["shown"], sl["attachments"]
     evidence["links"] = step("links", f'{passes.get("speech", {}).get("key")}|{passes["events"]["key"]}', lambda: links_pass.build(evidence, lang))
+    evidence["checks"] = step("checks", f'{passes.get("speech", {}).get("key")}|{passes["events"]["key"]}|{no_speech}', lambda: checks_pass.build(evidence, work, lang, speech=not no_speech))
     crops(evidence, work)
     dump(work / "evidence.json", evidence)
     title = f"{key}{' · ' + variant if variant else ''}"

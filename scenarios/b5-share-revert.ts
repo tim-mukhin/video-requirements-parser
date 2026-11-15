@@ -62,6 +62,7 @@ export const b5 = (lang: Lang): Scenario => {
         'После «Сохранить» тост «Настройки доступа сохранены», в списке у файла на секунду «по ссылке», затем «личный»; при повторном открытии диалога режим «Только приглашённые».',
       ),
       critical: ['pick', 'save', 'saved', 'revert', 'reopen'],
+      checks: [{ kind: 'revert', at: 'revert' }],
       traps: [
         t(
           'the access badge in the file list shows "link" for about a second and silently reverts: a change with no words',

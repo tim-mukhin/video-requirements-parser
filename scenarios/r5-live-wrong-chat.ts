@@ -36,6 +36,7 @@ export const r5 = (lang: Lang): Scenario => {
         'Перед отправкой открыт чат «Команда DX» (заголовок и лента команды); «Бюджет_2027.xlsx» ушёл туда и доставлен. В чате с Марко Петровичем файла нет, потому что туда его не отправляли.',
       ),
       critical: ['send', 'open-marko'],
+      checks: [{ kind: 'claim', at: 'claim' }],
       traps: [
         t('User error: at the moment of sending the chat header said "DX Team"', 'ошибка пользователя: в заголовке чата при отправке было «Команда DX»'),
         t(

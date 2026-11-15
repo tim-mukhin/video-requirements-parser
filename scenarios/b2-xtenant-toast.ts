@@ -57,8 +57,8 @@ export const b2 = (lang: Lang): Scenario => {
       { say: t('Well, looks like it went out, [here](ref:a/msg:s1) is the check mark.', 'Ну, вроде ушло, [вот](ref:a/msg:s1) отметка стоит.') },
       { say: t("But [on his side](focus:b#peer) it's empty. Nothing came through.", 'А [у него](focus:b#peer) пусто. Ничего не пришло.') },
       { wait: 0.6 },
-      { say: t('And [here](ref:?) there was nothing either, I already checked.', 'И [тут](ref:?) тоже ничего не было, я уже проверял.') },
-      { say: t('It should just arrive, like it normally does.', 'Должно же приходить, как обычно.') },
+      { say: t('And [here](ref:?) there was nothing either, I already checked.', 'И [тут](ref:?) тоже ничего не было, я уже проверял.'), name: 'checked' },
+      { say: t('It should just arrive, like it normally does.', 'Должно же приходить, как обычно.'), name: 'normally' },
     ],
     bug: {
       class: 'silent-fail',
@@ -78,6 +78,7 @@ export const b2 = (lang: Lang): Scenario => {
         'У отправителя сообщение с файлом отмечено отправленным; на 0,3 с мелькает тост «Не удалось доставить: получатель во внешней организации»; у получателя сообщение не появляется.',
       ),
       critical: ['send', 'toast', 'peer'],
+      checks: [{ kind: 'unmentioned', at: 'toast' }, { kind: 'claim', at: 'checked' }, { kind: 'claim', at: 'normally' }],
       traps: [
         t('notify: the calendar notification is unrelated to the bug', 'notify: уведомление календаря не связано с багом'),
         t(
