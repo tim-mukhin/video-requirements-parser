@@ -33,10 +33,10 @@ for lang in sorted({p.parts[-3] for p in OUT.glob("*/*/manifest.json")}):
         d = m["difficulty"]
         rows.append(
             f"<tr><td><b>{man.parent.name}</b><br><span>{html.escape(m['title'])}</span></td><td>{m.get('device', 'desktop')}<br>{d['speech']}, {d['signal']['kind']}</td>"
-            f"<td>{variants}</td><td>{' · '.join(filter(None, links))}</td><td>{crit}</td><td>{pct(r.get('recall'))}</td><td>{pct(r.get('precision'))}</td><td>{pct(r.get('wer'))}</td></tr>"
+            f"<td>{variants}</td><td>{' · '.join(filter(None, links))}</td><td>{crit}</td><td>{pct(r.get('recall'))}</td><td>{pct(r.get('precision'))}</td><td>{pct(r.get('clicks'))}</td><td>{pct(r.get('hovers'))}</td><td>{pct(r.get('screen_text'))}</td><td>{pct(r.get('links'))}</td><td>{pct(r.get('speakers'))}</td><td>{pct(r.get('slides'))}</td><td>{pct(r.get('files'))}</td><td>{pct(r.get('wer'))}</td></tr>"
         )
     sections.append(
-        f"<h2>{LANG_NAMES.get(lang, lang)}</h2><table><tr><th>Scenario</th><th>Kind</th><th>Video</th><th>Timelines</th><th>Critical</th><th>Recall</th><th>Precision</th><th>WER</th></tr>{''.join(rows)}</table>"
+        f"<h2>{LANG_NAMES.get(lang, lang)}</h2><table><tr><th>Scenario</th><th>Kind</th><th>Video</th><th>Timelines</th><th>Critical</th><th>Recall</th><th>Precision</th><th>Clicks</th><th>Hovers</th><th>Screen text</th><th>Links</th><th>Speakers</th><th>Slides</th><th>Files</th><th>WER</th></tr>{''.join(rows)}</table>"
     )
 
 page = f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><title>video-requirements-parser</title><style>
@@ -44,7 +44,7 @@ body{{font:14px/1.45 -apple-system,Inter,sans-serif;background:#0f1115;color:#e5
 td,th{{border-bottom:1px solid #262a33;padding:8px;text-align:left;vertical-align:top}} th{{color:#9ca3af;font-weight:500}} td span{{color:#9ca3af;font-size:12px}}
 a{{color:#60a5fa;text-decoration:none}} a:hover{{text-decoration:underline}}</style></head><body>
 <h1>Synthetic test videos and parser results</h1>
-<p>Critical - critical moments of the scenario found by the parser; recall and precision - over screen changes; WER - word error rate of the speech.</p>
+<p>Critical - critical moments of the scenario found by the parser; recall and precision - over screen changes; clicks and hovers - found from the cursor track; screen text - share of on-screen texts read at the right moment; WER - word error rate of the speech.</p>
 {''.join(sections)}</body></html>
 """
 (OUT / "index.html").write_text(page)

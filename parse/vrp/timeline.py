@@ -13,6 +13,7 @@ LABEL = {
     "appear": "APPEARED",
     "disappear": "DISAPPEARED",
     "text_change": "CHANGED",
+    "visual_change": "ICON/COLOUR CHANGED",
     "screen_change": "SCREEN CHANGED",
     "window_change": "WINDOW TO FRONT",
     "click": "CLICK",
@@ -76,7 +77,19 @@ def describe(e: dict) -> str:
         return f'{lab}: "{e.get("before", "")}" → "{e.get("after", text)}"'
     if e["kind"] == "screen_change":
         return f"{lab}: {text[:300]}"
+    if e["kind"] == "visual_change":
+        return f'{lab} in: "{text}"' if text else f"{lab} at {e['bbox']}"
+    if e["kind"] in ("click", "point") and not text:
+        return f"{lab} at {e.get('at')}"
+    if e["kind"] == "point" and e.get("end_ms"):
+        return f'{lab} for {(e["end_ms"] - e["t_ms"]) / 1000:.1f} s: "{text}"'
     return f'{lab}: "{text}"'
+
+
+def link_text(ln: dict) -> str:
+    rel = {"click": "clicked", "point": "pointed at", "focus": "brought to front", "mentions": "refers to"}[ln["relation"]]
+    tgt = (f'"{ln["target"]["text"]}"' if ln["target"]["text"] else f"the element at {ln['target']['bbox']}") if ln["target"] else "nothing on screen (unresolved)"
+    return f'↳ "{ln["phrase"]}" {rel} {tgt}'
 
 
 def render_md(evidence: dict, title: str) -> str:
@@ -91,9 +104,14 @@ def render_md(evidence: dict, title: str) -> str:
         "## Timeline",
         "",
     ]
+    by_utt: dict[str, list[dict]] = {}
+    for ln in evidence.get("links", []):
+        by_utt.setdefault(ln["utterance"], []).append(ln)
     for r in rows(evidence):
         if r["kind"] == "speech":
             lines.append(f'{ts(r["t"])}  SAID {r["who"]}: "{r["text"]}"  [{r["ids"][0]}]')
+            for ln in by_utt.get(r["ids"][0], []):
+                lines.append(f'         {link_text(ln)}')
             continue
         evs = r["events"]
         gone = [e for e in evs if e["kind"] == "disappear"]
@@ -106,6 +124,16 @@ def render_md(evidence: dict, title: str) -> str:
         if gone:
             names = ", ".join(f'"{(e.get("text") or "").strip()}"' for e in gone[:12]) + (f" and {len(gone) - 12} more" if len(gone) > 12 else "")
             lines.append(f"{ts(r['t']) if first else ' ' * 7}  DISAPPEARED: {names}  [{gone[0]['id']}…{gone[-1]['id']}]{frame if first else ''}")
+    if evidence.get("slides"):
+        lines += ["", "## Slides on screen", ""]
+        for sl in evidence["slides"]:
+            lines.append(f'{ts(sl["start_ms"])}-{ts(sl["end_ms"])}  slide {sl["index"]}: "{sl["title"]}"')
+    for a in evidence.get("attachments") or []:
+        lines += ["", f'## Attached file {a["file"]} ({a["pages"]} pages)', ""]
+        if not a["differs_from_screen"]:
+            lines.append("Says the same as the slides that were shown.")
+        for d in a["differs_from_screen"]:
+            lines.append(f'Slide {d["index"]} differs. On screen, not in the file: {", ".join(d["not_in_file"]) or "-"}. In the file, not on screen: {", ".join(d["not_on_screen"]) or "-"}.')
     lines += ["", "## Screen states", ""]
     for s in evidence["screens"]:
         top = " | ".join(b["text"] for b in sorted(s["texts"], key=lambda b: (b["bbox"][1], b["bbox"][0]))[:6])
@@ -124,11 +152,12 @@ main{display:grid;grid-template-columns:minmax(420px,46%) 1fr;height:calc(100vh 
 .row:hover{background:#171a21} .row.on{background:#1e293b} .t{color:#60a5fa;font-variant-numeric:tabular-nums}
 .speech .who{color:#f59e0b;font-weight:600;margin-right:6px} .speech .txt{color:#f3f4f6}
 .ev{margin:2px 0} .b{display:inline-block;font-size:11px;font-weight:700;padding:1px 6px;border-radius:4px;margin-right:6px;background:#374151}
-.b.appear{background:#065f46} .b.flash{background:#b91c1c} .b.disappear{background:#4b5563} .b.text_change{background:#92400e}
+.b.appear{background:#065f46} .b.visual_change{background:#6d28d9} .b.click,.b.point{background:#0e7490} .b.flash{background:#b91c1c} .b.disappear{background:#4b5563} .b.text_change{background:#92400e}
 .b.screen_change,.b.window_change{background:#1d4ed8} .id{color:#6b7280;font-size:11px;margin-left:6px}
 .crops{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px} .crops img{max-height:90px;max-width:360px;border-radius:4px;border:1px solid #374151}
 .gone{color:#9ca3af;font-size:12px} .key img{max-width:260px;border-radius:4px;margin-top:6px;border:1px solid #374151}
-label{color:#9ca3af;font-size:12px}
+label{color:#9ca3af;font-size:12px} .link{color:#a5b4fc;font-size:12px;margin-top:2px}
+#extra h3{font-size:13px;margin:16px 0 6px;color:#e5e7eb} #extra div{font-size:12px;color:#9ca3af;cursor:pointer} #extra .diff{color:#fca5a5}
 """
 
 JS = """
@@ -147,9 +176,13 @@ def render_html(evidence: dict, title: str, video_src: str) -> str:
     esc = html.escape
     v = evidence["video"]
     feed = []
+    by_utt: dict[str, list[dict]] = {}
+    for ln in evidence.get("links", []):
+        by_utt.setdefault(ln["utterance"], []).append(ln)
     for r in rows(evidence):
         if r["kind"] == "speech":
-            feed.append(f'<div class="row speech" data-t="{r["t"]}"><div class="t">{ts(r["t"])}</div><div><span class="who">{esc(r["who"])}</span><span class="txt">{esc(r["text"])}</span><span class="id">{r["ids"][0]}</span></div></div>')
+            lk = "".join(f'<div class="link">{esc(link_text(ln))}</div>' for ln in by_utt.get(r["ids"][0], []))
+            feed.append(f'<div class="row speech" data-t="{r["t"]}"><div class="t">{ts(r["t"])}</div><div><span class="who">{esc(r["who"])}</span><span class="txt">{esc(r["text"])}</span><span class="id">{r["ids"][0]}</span>{lk}</div></div>')
             continue
         evs = r["events"]
         gone = [e for e in evs if e["kind"] == "disappear"]
@@ -171,9 +204,15 @@ def render_html(evidence: dict, title: str, video_src: str) -> str:
         for s in evidence["screens"]
         if s.get("frame")
     )
+    extra = ""
+    if evidence.get("slides"):
+        extra += "<h3>Slides on screen</h3>" + "".join(f'<div class="sl" data-t="{sl["start_ms"]}">{ts(sl["start_ms"])}-{ts(sl["end_ms"])} · slide {sl["index"]}: {esc(sl["title"])}</div>' for sl in evidence["slides"])
+    for a in evidence.get("attachments") or []:
+        extra += f'<h3>{esc(a["file"])}</h3>'
+        extra += "".join(f'<div class="diff">Slide {d["index"]} differs. On screen, not in the file: {esc(", ".join(d["not_in_file"]) or "-")}. In the file, not on screen: {esc(", ".join(d["not_on_screen"]) or "-")}.</div>' for d in a["differs_from_screen"]) or "<div>Says the same as the slides that were shown.</div>"
     meta = f"{v['width']}×{v['height']} · {v['duration_ms'] / 1000:.1f} s · states {len(evidence['screens'])} · events {len(evidence['events'])} · utterances {len(evidence['speech']['utterances'])}"
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><title>{esc(title)}</title><style>{CSS}</style></head><body>
 <header><h1>{esc(title)}</h1><p>{meta} · <label><input type="checkbox" id="auto" checked> follow the video</label></p></header>
-<main><div id="left"><video src="{esc(video_src)}" controls></video><div id="screens">{strip}</div></div><div id="feed">{"".join(feed)}</div></main>
+<main><div id="left"><video src="{esc(video_src)}" controls></video><div id="screens">{strip}</div><div id="extra">{extra}</div></div><div id="feed">{"".join(feed)}</div></main>
 <script>{JS}</script><script type="application/json" id="evidence">{json.dumps(evidence, ensure_ascii=False).replace("</", "<\\/")}</script></body></html>
 """

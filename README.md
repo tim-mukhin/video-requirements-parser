@@ -126,8 +126,12 @@ recomputed only when the video or the pass version changes.
 out/<lang>/<id>/parsed/
   run.json          video hash, pass versions, timings
   10-speech.json    utterances and word timings (Whisper)
-  30-screens.json   stable screen states: time, key frame, OCR text (Apple Vision)
-  60-events.json    what appeared, disappeared, changed; how long it was shown (a 0.3 s toast)
+  30-screens.json   screen region, cursor track, stable screen states: time, key frame, OCR text (Apple Vision)
+  60-events.json    what appeared, disappeared, changed, which window came to the front, clicks and hovers;
+                    how long something was shown (a 0.3 s toast)
+  70-links.json     what a phrase refers to on the screen ("this one", "right here", "I click send")
+  80-speakers.json  meetings: participant tiles and the tile lit during each utterance
+  90-slides.json    which slide was on screen when; how attached pdf/pptx differ from what was shown
   evidence.json     everything together, format in parse/vrp/format.py
   timeline.md       timeline for an agent: time, event, id, evidence frame
   timeline.html     the same with the video, a screen-state strip and cut-outs
@@ -137,15 +141,54 @@ out/<lang>/<id>/parsed/
 cd parse
 uv venv --python 3.12 .venv && uv pip install --python .venv/bin/python numpy opencv-python-headless ocrmac mlx-whisper httpx rapidfuzz
 .venv/bin/python truth.py           # generator ground truth -> truth/evidence.json and ground-truth timelines
-.venv/bin/python run.py [key ...]   # parse
+.venv/bin/python run.py [key ...]   # parse (--variant low, --no-speech to skip the speech model)
 .venv/bin/python evaluate.py        # compare with ground truth
 .venv/bin/python report.py          # out/index.html
 ```
 
-What was seen stays apart from what was inferred: every event has a source (`ocr`, `pixel`, `cursor`, `model`) and
-evidence frames. Done so far: a change scanner over every frame, OCR of stable states, speech. Next: UI objects
-(dialog, toast, menu, window), recognising screens and returns to them, regions and masks (screen vs people in a
-meeting recording), cursor and clicks, speakers, linking "right here" to the screen, slides vs the attached file.
+What was seen stays apart from what was inferred: every event has a source (`ocr`, `pixel`, `cursor`, `touch`,
+`model`) and evidence frames. What the passes do:
+
+- **regions** - in a meeting recording the shared screen is found as the largest area that is not the dark, unchanging
+  meeting window; only that area is scanned and read, the people tiles are left out;
+- **cursor** - the arrow is found by template (scale and polarity once per video), then followed near its last place
+  and where the frame moved; its area is left out of frame comparison, so small changes (a status turning into a check
+  mark) split the screen state and cursor moves do not;
+- **screen states** - a change scanner over every frame at half size, plus a comparison with the state's key frame for
+  changes that happened under the cursor; OCR of every stable state;
+- **elements** - text that appeared or disappeared is grouped by its container (flood fill of the background around it:
+  a bubble, a dialog, a menu), so a new message is one event with all its lines; a same-text area whose pixels changed
+  is a `visual_change` (an icon, a mark); content that only moved and OCR reading the same pixels differently (a dimmed
+  backdrop) are not changes;
+- **window** - the front window is the one with coloured title-bar buttons, its title is the text next to them;
+- **clicks and hovers** - a click is the cursor at rest and the screen reacting: right after it stopped, or later if
+  the control under it changed; a hover is the cursor wiggling over one place after its approach slowed down; on a
+  phone a round touch mark is a tap;
+- **links** - words said during a click, a hover or a window switch are about its target; a pointing word ("this",
+  "here") goes to what is being pointed at, else to what has just appeared, else stays unresolved; words that repeat a
+  text on the screen are a mention of it;
+- **speakers** - in a meeting the speaking tile is outlined; the outline is followed over the video, each tile's
+  caption is read once, every utterance gets the tile lit during it (a room tile gives the room; a person in it is named
+  only when they introduce themselves);
+- **slides** - the slide number on screen ("3 / 6", "Slide 3 of 6") gives which slide was shown when, returns
+  included; the words of the slide (title down to the footer) are compared with each page of the attached pdf and pptx.
+
+Next: recognising app screens and returns to them beyond slides, telling apart people in one room tile by voice.
+
+Known limitations:
+
+- **480p** - small text is read with errors and the cursor jitters, so clicks there are unreliable; 720p and up is the
+  target.
+- **People in one room tile** - only the one who introduces themselves gets a name; the others stay "the room".
+- **Links that need meaning** - "here as well" that refers back to an earlier phrase, or "this one" said while clicking
+  something else, are not resolved by the rules above.
+- **Ground truth of icon buttons** - the generator records the label of an icon button (Attach, Send) as its text,
+  though nothing is written on screen; screen text below 100% on such videos is mostly that.
+
+The evaluator (`evaluate.py`) reports: critical moments of the scenario, recall and precision of screen changes,
+clicks (time and place), hovers, screen text (share of on-screen texts read at the right moment, this is where facts
+that never change show up, like a garbled file name), links, speakers, slides, attached files and the word error rate
+of the speech.
 
 ## Scenarios
 

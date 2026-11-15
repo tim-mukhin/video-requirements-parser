@@ -63,6 +63,7 @@ EventKind = Literal[
     "appear",  # an element appeared: toast, dialog, message, console line
     "disappear",
     "text_change",  # text changed in place: status, upload percent
+    "visual_change",  # pixels of an element changed, its text did not: an icon, a check mark, a lock
     "window_change",  # another window or tab came to the front
     "screen_change",  # slide, application or the whole screen changed
     "click",
@@ -82,9 +83,10 @@ class Event(TypedDict):
     before: NotRequired[str | None]
     after: NotRequired[str | None]
     visible: bool  # False - the change happened in a covered part of the screen
-    source: Literal["pixel", "ocr", "cursor", "model", "truth"]
+    source: Literal["pixel", "ocr", "cursor", "touch", "model", "truth"]
     evidence: list[str]  # frames before / during / after
     crop: NotRequired[str]  # cut-out of the element from the evidence frame
+    at: NotRequired[list[int]]  # click, point: the cursor tip or the touch centre
 
 
 class Target(TypedDict):
