@@ -1,0 +1,5 @@
+OmniParser/
+weights/
+.venv/
+runs/
+__pycache__/
