@@ -2,10 +2,10 @@
 to the video (pdf, pptx) says the same as what was shown. No model: text of the screen against text of the file.
 """
 import re
-import subprocess
 import zipfile
 from pathlib import Path
 
+import pypdfium2 as pdfium
 from rapidfuzz import fuzz
 
 PAGE = [re.compile(r"(?<![\d/])(\d{1,2})\s*/\s*(\d{1,2})\s*$"), re.compile(r"slide\s+(\d{1,2})\s+(?:of|из)\s+(\d{1,2})", re.I)]
@@ -63,8 +63,11 @@ def shown(screens: list[dict]) -> tuple[list[dict], dict[int, set[str]]]:
 
 def file_pages(path: Path) -> list[set[str]]:
     if path.suffix == ".pdf":
-        text = subprocess.run(["pdftotext", "-layout", str(path), "-"], capture_output=True, text=True, check=True).stdout
-        return [set(toks(p)) for p in text.split("\f") if p.strip()]
+        pdf = pdfium.PdfDocument(path)
+        try:
+            return [set(toks(page.get_textpage().get_text_range())) for page in pdf]
+        finally:
+            pdf.close()
     if path.suffix == ".pptx":
         with zipfile.ZipFile(path) as z:
             names = sorted((n for n in z.namelist() if re.fullmatch(r"ppt/slides/slide\d+\.xml", n)), key=lambda n: int(re.findall(r"\d+", n)[-1]))

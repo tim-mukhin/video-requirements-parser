@@ -16,12 +16,12 @@ CONTAINERS = {"list", "slide", "column", "panel", "menu", "listbox", "breadcrumb
 
 def load(d: Path, name: str):
     p = d / "truth" / name
-    return json.loads(p.read_text()) if p.exists() else None
+    return json.loads(p.read_text(encoding="utf-8")) if p.exists() else None
 
 
 def convert(sid: str) -> dict:
     d = OUT / sid
-    man = json.loads((d / "manifest.json").read_text())
+    man = json.loads((d / "manifest.json").read_text(encoding="utf-8"))
     states = load(d, "ui-states.json")
     timeline = load(d, "timeline.json")
     speakers = load(d, "speakers.json") or []
@@ -173,7 +173,7 @@ if __name__ == "__main__":
     for key in keys:
         ev = convert(key)
         name = key.split("/")[1]
-        (OUT / key / "truth" / "evidence.json").write_text(json.dumps(ev, ensure_ascii=False, indent=1))
-        (OUT / key / "truth" / "timeline.md").write_text(render_md(ev, f"{key} · ground truth"))
-        (OUT / key / "truth" / "timeline.html").write_text(render_html(ev, f"{key} · ground truth", video_src=f"../../{name}.mp4"))
+        (OUT / key / "truth" / "evidence.json").write_text(json.dumps(ev, ensure_ascii=False, indent=1), encoding="utf-8")
+        (OUT / key / "truth" / "timeline.md").write_text(render_md(ev, f"{key} · ground truth"), encoding="utf-8")
+        (OUT / key / "truth" / "timeline.html").write_text(render_html(ev, f"{key} · ground truth", video_src=f"../../{name}.mp4"), encoding="utf-8")
         print(f"{key}: {len(ev['events'])} events, {len(ev['speech']['utterances'])} utterances, {len(ev['critical'])} critical moments")

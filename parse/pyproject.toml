@@ -5,8 +5,14 @@ requires-python = ">=3.12,<3.13"
 dependencies = [
   "numpy",
   "opencv-python-headless",
-  "ocrmac",
-  "mlx-whisper",
+  "pillow",
+  "rapidocr",
+  "onnxruntime",
+  "faster-whisper",
+  "pyannote.audio>=4",
+  "pypdfium2",
   "httpx",
   "rapidfuzz",
+  "ocrmac; sys_platform == 'darwin'",
+  "mlx-whisper; sys_platform == 'darwin' and platform_machine == 'arm64'",
 ]

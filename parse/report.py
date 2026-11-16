@@ -16,13 +16,13 @@ def pct(x):
     return "-" if x is None else f"{x * 100:.0f}%"
 
 
-ev = {r["id"]: r for r in json.loads((OUT / "_eval.json").read_text())} if (OUT / "_eval.json").exists() else {}
+ev = {r["id"]: r for r in json.loads((OUT / "_eval.json").read_text(encoding="utf-8"))} if (OUT / "_eval.json").exists() else {}
 sections = []
 for lang in sorted({p.parts[-3] for p in OUT.glob("*/*/manifest.json")}):
     rows = []
     for man in sorted(OUT.glob(f"{lang}/*/manifest.json")):
         key = f"{lang}/{man.parent.name}"
-        m = json.loads(man.read_text())
+        m = json.loads(man.read_text(encoding="utf-8"))
         r = ev.get(key, {})
         variants = " ".join(f'<a href="{lang}/{html.escape(v["file"][3:])}">{v["id"]}</a>' for v in m["variants"])
         parsed = man.parent / "parsed"
@@ -49,5 +49,5 @@ a{{color:#60a5fa;text-decoration:none}} a:hover{{text-decoration:underline}}</st
 <p>Critical - critical moments of the scenario found by the parser; recall and precision - over screen changes; clicks and hovers - found from the cursor track; screen text - share of on-screen texts read at the right moment; WER - word error rate of the speech.</p>
 {''.join(sections)}</body></html>
 """
-(OUT / "index.html").write_text(page)
+(OUT / "index.html").write_text(page, encoding="utf-8")
 print(OUT / "index.html")
