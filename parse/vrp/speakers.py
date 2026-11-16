@@ -1,19 +1,19 @@
 """Speakers of a meeting: the tile of the person speaking is outlined (a green frame in Teams-like apps). The frame is
 followed over the video, each tile's caption is read once, and every utterance gets the tile lit for most of it.
 
-A room tile (several people at one camera) gives the room, not the person: the person is known only if they say who
-they are ("This is Lukas"); the others stay unnamed. One speaker and no lit tiles - a plain screen recording.
+A room tile (several people at one camera) gives the room, not the person; telling them apart is the voices pass.
+No lit tiles - a plain screen recording.
 """
 import re
 from pathlib import Path
 
 import cv2
 import numpy as np
-from ocrmac import ocrmac
 from PIL import Image
 
+from . import ocr as engine
+
 SAMPLE_FPS = 5
-INTRO = re.compile(r"\b(?:this is|it's|i'm|i am|my name is|это)\s+([A-ZА-ЯЁ][a-zа-яё]+)")
 
 
 def lit_tiles(frame: np.ndarray) -> list[list[int]]:
@@ -46,11 +46,10 @@ def caption(frame: np.ndarray, box: list[int], lang: str) -> str | None:
     x, y, w, h = box
     crop = cv2.cvtColor(frame[y:y + h, x:x + w], cv2.COLOR_BGR2RGB)
     img = Image.fromarray(crop).resize((w * 3, h * 3), Image.LANCZOS)
-    res = ocrmac.OCR(img, language_preference=["en-US"] if lang == "en" else ["ru-RU", "en-US"], recognition_level="accurate").recognize()
-    texts = [(t.strip(), bb) for t, c, bb in res if c >= 0.3 and re.search(r"\w{2,}", t)]
+    texts = [(t, b) for t, b in engine.read(img, lang) if re.search(r"\w{2,}", t)]
     if not texts:
         return None
-    t, _ = min(texts, key=lambda tb: tb[1][1])  # Vision boxes start at the bottom: the smallest y is lowest
+    t, _ = max(texts, key=lambda tb: tb[1][1] + tb[1][3])
     return re.sub(r"^[^\w]+", "", t).strip() or None
 
 
@@ -99,9 +98,5 @@ def assign(video: Path, utterances: list[dict], lang: str) -> dict:
         if not votes:
             continue
         k = max(votes, key=votes.get)
-        tile = tiles[k]["name"] or f"Tile{k + 1}"
-        # a room tile: the person only if they introduce themselves in this utterance
-        m = INTRO.search(u["text"])
-        person = m.group(1) if m and (tiles[k]["name"] or "").lower() != m.group(1).lower() else None
-        out["utterances"][u["id"]] = {"tile": tile, "person": person}
+        out["utterances"][u["id"]] = {"tile": tiles[k]["name"] or f"Tile{k + 1}"}
     return out

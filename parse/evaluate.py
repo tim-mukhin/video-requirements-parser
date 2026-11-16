@@ -1,6 +1,6 @@
-"""Parser evaluation against ground truth: out/<lang>/<id>/parsed[-variant]/evidence.json vs out/<lang>/<id>/truth/evidence.json.
+"""Parser evaluation against ground truth: out/<lang>/<id>/parsed[-variant][-tag]/evidence.json vs out/<lang>/<id>/truth/evidence.json.
 
-python evaluate.py [--variant low] [id ...]
+python evaluate.py [--variant low] [--tag name] [id ...]
 Metrics:
   wer        - word error rate of the speech;
   critical   - were the scenario's critical moments found (a toast, a message arriving, a setting reverting);
@@ -13,7 +13,11 @@ Metrics:
   hovers     - deliberate hovers found (the cursor over the element while the phrase lasts);
   slides     - meetings: share of the time the parser knows the right slide number;
   files      - attached pdf/pptx: share of files where the parser finds exactly the slides that differ from the screen;
-  speakers   - meetings: share of utterances attributed to the right tile;
+  speakers   - meetings: share of utterances attributed to the right tile (a room tile counts for everyone in it);
+  voices     - every video: the predicted speaker of each true utterance (the voice part overlapping it most), then the
+               best one-to-one mapping between predicted speakers and true ones; share of utterances on a mapped pair.
+               A room tile or a merged voice can map to one person only, so it is not credited to the others;
+               found/true count of speakers; name facts heard right / all (fuzzy against the name the video uses);
   links      - "right here", "this one", a click while saying "send": share of ground-truth links found;
   checks     - cross-checks from the bug markup (an error nobody mentions, a value that went back, a change behind the
                front window, a claim the video does not show): found / marked, then flags with no mark (+n);
@@ -26,6 +30,7 @@ import re
 from pathlib import Path
 
 from rapidfuzz import fuzz
+from scipy.optimize import linear_sum_assignment
 from rapidfuzz.distance import Levenshtein
 
 OUT = Path(__file__).resolve().parents[1] / "out"
@@ -155,12 +160,42 @@ def speakers_score(truth: dict, pred: dict) -> float | None:
     return ok / n if n else None
 
 
+def voices_score(truth: dict, pred: dict) -> dict:
+    """Per true utterance the predicted speaker by time overlap, scored on the best one-to-one mapping."""
+    segs = [(p["start_ms"], p["end_ms"], p["voice"] or "unknown") for u in pred["speech"]["utterances"] for p in (u.get("parts") or [{**u, "voice": u.get("voice", u["speaker"])}])]
+    tu = truth["speech"]["utterances"]
+    got = [max(segs, key=lambda s: min(s[1], u["end_ms"]) - max(s[0], u["start_ms"]), default=None) for u in tu]
+    got = [g[2] if g and min(g[1], u["end_ms"]) - max(g[0], u["start_ms"]) > 0 else None for g, u in zip(got, tu)]
+    P = sorted({g for g in got if g})
+    T = sorted({u["speaker"] for u in tu})
+    m = [[sum(g == pl and u["speaker"] == tl for g, u in zip(got, tu)) for tl in T] for pl in P]
+    rows, cols = linear_sum_assignment(m, maximize=True) if P else ([], [])
+    ok = sum(m[r][c] for r, c in zip(rows, cols))
+    mapping = {P[r]: T[c] for r, c in zip(rows, cols)}
+    name = {s["id"]: s.get("name") for s in truth["speech"]["speakers"]} or {u["speaker"]: None for u in tu}
+    facts = right = 0
+    for u in pred["speech"]["utterances"]:
+        for f in u.get("names", []):
+            part = next((p for p in u.get("parts", []) if p["voice"] == f["voice"]), u)
+            t = max(tu, key=lambda x: min(x["end_ms"], part["end_ms"]) - max(x["start_ms"], part["start_ms"]))
+            facts += 1
+            right += bool(name.get(t["speaker"]) and fuzz.ratio(f["name"].lower(), name[t["speaker"]].lower()) >= 80)
+    return {
+        "voices": ok / len(tu) if tu else None,
+        "voices_found": len({u.get("voice", u["speaker"]) for u in pred["speech"]["utterances"]} - {None}),
+        "voices_true": len(T),
+        "voice_map": mapping,
+        "voice_confusion": {pl: dict(zip(T, row)) for pl, row in zip(P, m)},
+        "name_facts": f"{right}/{facts}",
+    }
+
+
 def slides_score(sid: str, pred: dict) -> tuple[float | None, float | None]:
     """Share of the time the right slide number is known; share of attached files whose differing slides are found."""
     path = OUT / sid / "truth" / "slides.json"
     if not path.exists():
         return None, None
-    truth = json.loads(path.read_text())
+    truth = json.loads(path.read_text(encoding="utf-8"))
     num = den = 0
     for s in truth["shown"]:
         mid, dur = (s["start_ms"] + s["end_ms"]) // 2, s["end_ms"] - s["start_ms"]
@@ -192,7 +227,7 @@ def screen_text(truth: dict, pred: dict) -> float | None:
 def checks_score(sid: str, pred: dict) -> dict:
     """A mark is found by a flag of its kind at the same moment (a claim: during its line)."""
     rep = OUT / sid / "truth" / "report.json"
-    marks = json.loads(rep.read_text()).get("checks", []) if rep.exists() else []
+    marks = json.loads(rep.read_text(encoding="utf-8")).get("checks", []) if rep.exists() else []
     flags = pred.get("checks", [])
     if not pred["speech"]["utterances"]:  # parsed without speech: only the checks that need none
         marks = [m for m in marks if m["kind"] in ("revert", "covered")]
@@ -212,9 +247,9 @@ def checks_score(sid: str, pred: dict) -> dict:
     }
 
 
-def evaluate(sid: str, variant: str | None) -> dict:
-    truth = json.loads((OUT / sid / "truth" / "evidence.json").read_text())
-    pred = json.loads((OUT / sid / (f"parsed-{variant}" if variant else "parsed") / "evidence.json").read_text())
+def evaluate(sid: str, variant: str | None, tag: str | None = None) -> dict:
+    truth = json.loads((OUT / sid / "truth" / "evidence.json").read_text(encoding="utf-8"))
+    pred = json.loads((OUT / sid / "-".join(["parsed", *filter(None, (variant, tag))]) / "evidence.json").read_text(encoding="utf-8"))
     tev = {e["id"]: e for e in truth["events"]}
     pev = pred["events"]
     # a quality variant is smaller than the master the ground truth is measured on
@@ -267,6 +302,7 @@ def evaluate(sid: str, variant: str | None) -> dict:
         "screen_text": screen_text(truth, pred),
         "links": links_score(truth, pred, k),
         "speakers": speakers_score(truth, pred),
+        **voices_score(truth, pred),
         "slides": slides_score(sid, pred)[0],
         "files": slides_score(sid, pred)[1],
         **checks_score(sid, pred),
@@ -289,18 +325,19 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("ids", nargs="*")
     ap.add_argument("--variant")
+    ap.add_argument("--tag", help="read parsed[-variant]-<tag>")
     a = ap.parse_args()
-    suffix = f"parsed-{a.variant}" if a.variant else "parsed"
+    suffix = "-".join(["parsed", *filter(None, (a.variant, a.tag))])
     ids = a.ids or sorted(f"{p.parts[-4]}/{p.parts[-3]}" for p in OUT.glob(f"*/*/{suffix}/evidence.json"))
-    rows = [evaluate(s, a.variant) for s in ids]
-    print(f"{'scenario':33} {'WER':>5} {'crit.':>7} {'recall':>6} {'prec':>6} {'clicks':>6} {'c.prec':>6} {'hover':>6} {'text':>6} {'links':>6} {'spkr':>6} {'slides':>6} {'files':>6} {'checks':>7}  not on screen")
+    rows = [evaluate(s, a.variant, a.tag) for s in ids]
+    print(f"{'scenario':33} {'WER':>5} {'crit.':>7} {'recall':>6} {'prec':>6} {'clicks':>6} {'c.prec':>6} {'hover':>6} {'text':>6} {'links':>6} {'spkr':>6} {'voices':>6} {'found':>5} {'names':>5} {'slides':>6} {'files':>6} {'checks':>7}  not on screen")
     for r in rows:
-        print(f"{r['id']:33} {pct(r['wer'])} {r['critical_found']:>3}/{r['critical_total']:<3} {pct(r['recall'])} {pct(r['precision'])} {pct(r['clicks'])} {pct(r['click_precision'])} {pct(r['hovers'])} {pct(r['screen_text'])} {pct(r['links'])} {pct(r['speakers'])} {pct(r['slides'])} {pct(r['files'])} {chk(r):>7}  {', '.join(r['not_on_screen'])}")
+        print(f"{r['id']:33} {pct(r['wer'])} {r['critical_found']:>3}/{r['critical_total']:<3} {pct(r['recall'])} {pct(r['precision'])} {pct(r['clicks'])} {pct(r['click_precision'])} {pct(r['hovers'])} {pct(r['screen_text'])} {pct(r['links'])} {pct(r['speakers'])} {pct(r['voices'])} {r['voices_found']:>2}/{r['voices_true']:<2} {r['name_facts']:>5} {pct(r['slides'])} {pct(r['files'])} {chk(r):>7}  {', '.join(r['not_on_screen'])}")
     tot_f, tot_t = sum(r["critical_found"] for r in rows), sum(r["critical_total"] for r in rows)
     print(f"{'critical total':33} {'':5} {tot_f:>3}/{tot_t:<3}")
     print(f"{'checks total':33} {sum(r['checks_found'] for r in rows)}/{sum(r['checks_total'] for r in rows)}, flags with no mark: {sum(len(r['checks_extra']) for r in rows)}")
     # merge into the stored results so evaluating a few scenarios does not drop the others
-    path = OUT / f"_eval{'-' + a.variant if a.variant else ''}.json"
-    stored = {r["id"]: r for r in json.loads(path.read_text())} if path.exists() else {}
+    path = OUT / f"_eval{suffix.removeprefix('parsed')}.json"
+    stored = {r["id"]: r for r in json.loads(path.read_text(encoding="utf-8"))} if path.exists() else {}
     stored.update({r["id"]: r for r in rows})
-    path.write_text(json.dumps(sorted(stored.values(), key=lambda r: r["id"]), ensure_ascii=False, indent=1))
+    path.write_text(json.dumps(sorted(stored.values(), key=lambda r: r["id"]), ensure_ascii=False, indent=1), encoding="utf-8")
