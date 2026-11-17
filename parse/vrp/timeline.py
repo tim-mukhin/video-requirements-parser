@@ -8,6 +8,9 @@ from pathlib import Path
 
 import cv2
 
+from .events import look_words, way
+from .voices import label, summary
+
 SHORT_MS = 1000  # appeared and disappeared faster than this - "flashed"
 LABEL = {
     "appear": "APPEARED",
@@ -20,7 +23,15 @@ LABEL = {
     "point": "HOVER",
     "key": "KEY",
     "type": "TYPED",
+    "move": "MOVED",
+    "scroll": "SCROLLED",
+    "drag": "DRAG",
+    "flicker": "FLICKER",
 }
+
+
+SHAPE = {"hand": " (hand cursor)", "text": " (I-beam cursor)"}
+NAMES = {"text": "I-beam"}  # the arrow is the default, not worth a word
 
 
 def ts(ms: int) -> str:
@@ -50,14 +61,14 @@ def crops(evidence: dict, work: Path, pad: int = 16) -> None:
             continue
         path = out / f"{e['id']}.jpg"
         cv2.imwrite(str(path), img[y0:y1, x0:x1], [cv2.IMWRITE_JPEG_QUALITY, 90])
-        e["crop"] = str(path.relative_to(work))
+        e["crop"] = path.relative_to(work).as_posix()
 
 
 def rows(evidence: dict) -> list[dict]:
     """A timeline row: an utterance, or a moment when something happened on screen (events of one moment together)."""
     out = []
     for u in evidence["speech"]["utterances"]:
-        out.append({"t": u["start_ms"], "kind": "speech", "who": u["speaker"], "text": u["text"], "end": u["end_ms"], "ids": [u["id"]]})
+        out.append({"t": u["start_ms"], "kind": "speech", "who": label(u), "parts": u.get("parts", []), "text": u["text"], "end": u["end_ms"], "ids": [u["id"]]})
     moments: dict[int, list[dict]] = {}
     for e in evidence["events"]:
         moments.setdefault(e["t_ms"], []).append(e)
@@ -66,8 +77,38 @@ def rows(evidence: dict) -> list[dict]:
     return sorted(out, key=lambda r: (r["t"], r["kind"] != "screen"))
 
 
+def span(e: dict) -> str:
+    ms = e["end_ms"] - e["t_ms"]
+    return "in one frame" if e.get("frames") == 1 else f"over {ms} ms" if ms < 1000 else f"over {ms / 1000:.1f} s"
+
+
 def describe(e: dict) -> str:
+    if e.get("edge"):
+        return describe({**e, "edge": None}) + f' (its box reaches the {" and ".join(e["edge"])} edge of the screen: it may be cut off there, a guess)'
     lab = LABEL[e["kind"]]
+    if e["kind"] == "flicker" and e["source"] == "cursor":
+        shapes = " and ".join(NAMES.get(k, k) for k in e["cursor"])
+        return (f'{lab} of the cursor: it switched between two shapes (tracked as {shapes}) {e["count"]} times {span(e)}, '
+                f'{e["still"]} of them while it did not move')
+    if e["kind"] == "flicker":
+        what = f': "{e["text"]}"' if e.get("text") else ""
+        return f'{lab}: the area at {e["bbox"]} went back to how it looked a moment before {e["count"]} times {span(e)}{what}'
+    if e["kind"] == "type" and e.get("values"):
+        seq = " → ".join(f'"{v}"' for v in e["values"])
+        return f'{lab} (inferred: the text of one field changed in place {len(e["values"]) - 1} times {span(e)}, as OCR read it): {seq}'
+    if e["kind"] in ("move", "scroll", "drag"):
+        what = f'"{e["text"]}"' if e.get("text") else f"the area at {e['bbox']}"
+        how = f'{way(*e["peak"])} and back {e["back_ms"]} ms later' if e.get("back") else f'{way(e["dx"], e["dy"])} {span(e)}'
+        if e["kind"] == "scroll":
+            return f'{lab}: content moved {how} (area {e["bbox"]}): {what}'
+        if e["kind"] == "drag":
+            onto = f' onto "{e["onto"]}"' if e.get("onto") else ""
+            after = f'after the drop: {e["after"]}' if e.get("after") else "nothing changed on screen within 1.5 s after the drop"
+            return (f'{lab} (inferred: the cursor moved and the content under it followed): {what} from {e.get("at")} to {e.get("to")}{onto}, '
+                    f'{how}; {after}')
+        if e.get("from"):
+            return f'{lab} {how}, from {e["from"]} to {e["bbox"]}: {what}'
+        return f'{lab} {how}: {what}' + (f" (area {e['bbox']})" if e.get("text") else "")
     text = (e.get("text") or "").strip()
     if e["kind"] == "appear" and e.get("end_ms") and e["end_ms"] - e["t_ms"] < SHORT_MS:
         return f'FLASHED for {(e["end_ms"] - e["t_ms"]) / 1000:.1f} s: "{text}"'
@@ -78,9 +119,15 @@ def describe(e: dict) -> str:
     if e["kind"] == "screen_change":
         return f"{lab}: {text[:300]}"
     if e["kind"] == "visual_change":
-        return f'{lab} in: "{text}"' if text else f"{lab} at {e['bbox']}"
-    if e["kind"] in ("click", "point") and not text:
-        return f"{lab} at {e.get('at')}"
+        how = look_words(e.get("look"))
+        where = f" just {e['beside']}" if e.get("beside") else ""
+        return (f'{lab} in: "{text}"' if text else f"{lab} at {e['bbox']}{where}") + (f" ({how})" if how else "")
+    if e["kind"] == "point" and e.get("reaction"):
+        return describe({**e, "reaction": None}) + f" - the element under it: {e['reaction']}"
+    if e["kind"] in ("click", "point"):
+        lab += SHAPE.get(e.get("cursor"), "")
+        if not text:
+            return f"{lab} at {e.get('at')}"
     if e["kind"] == "point" and e.get("end_ms"):
         return f'{lab} for {(e["end_ms"] - e["t_ms"]) / 1000:.1f} s: "{text}"'
     return f'{lab}: "{text}"'
@@ -95,6 +142,24 @@ def link_text(ln: dict) -> str:
 CHECK = {"unmentioned": "ERROR NOBODY MENTIONS", "revert": "WENT BACK BY ITSELF", "covered": "CHANGED BEHIND THE FRONT WINDOW", "claim": "CLAIM NOT SHOWN"}
 
 
+def input_line(evidence: dict) -> list[str]:
+    """What the video lets us see of the user's own actions: no CLICK before a change is not "it happened by itself"."""
+    i = evidence.get("input")
+    if not i:
+        return []
+    unseen = ("A change with no CLICK or TAP right before it was still caused by something: most likely a click, tap or key "
+              "the video does not show, not the app acting by itself.")
+    device = f" Looks like a phone or tablet ({i['touch_screen']}), a guess." if i.get("touch_screen") else ""
+    if i["cursor_share"] == 0 and not i["touch"]:
+        return [f"User input: no mouse cursor and no touch marks are visible in this video, so clicks, taps and keys are not seen.{device} {unseen}"]
+    if i["cursor_share"] == 0:
+        return [f"User input: no mouse cursor; {i['touch']} taps are seen as touch marks, but only where the recorder draws them.{device} {unseen}"]
+    lost = ", ".join(f"{ts(a)}-{ts(b)}" for a, b in i["cursor_lost"][:6])
+    return [f"User input: the cursor is followed through {i['cursor_share']:.0%} of the video"
+            + (f"; it is not found {lost}, and clicks there are not seen" if lost else "")
+            + ". Clicks are inferred (the cursor stopped, then the screen reacted); keys are not seen."]
+
+
 def render_md(evidence: dict, title: str) -> str:
     v = evidence["video"]
     lines = [
@@ -103,12 +168,17 @@ def render_md(evidence: dict, title: str) -> str:
         f"Video `{v['file']}`, {v['width']}×{v['height']}, {v['duration_ms'] / 1000:.1f} s. "
         f"Screen states: {len(evidence['screens'])}, events: {len(evidence['events'])}, utterances: {len(evidence['speech']['utterances'])}.",
         "Time is from the start of the video. Square brackets hold event ids from evidence.json, then the evidence frame.",
+        *(["The video has no audio track: nothing was said, every fact comes from the screen."] if evidence["speech"].get("no_audio") else []),
+        *input_line(evidence),
         "",
     ]
     if evidence.get("checks"):
         lines += ["## Cross-checks", "", "Facts that show only when speech, screen and windows are put side by side.", ""]
         lines += [f'{ts(c["t_ms"])}  {CHECK[c["kind"]]}: {c["text"]}  [{", ".join(c["refs"])}]' for c in evidence["checks"]]
         lines.append("")
+    if voices := summary(evidence):
+        lines += ["## Voices", "", "Voice ids come from the sound (diarization); tiles and names are facts with their source, not a verdict.", ""]
+        lines += voices + [""]
     lines += ["## Timeline", ""]
     by_utt: dict[str, list[dict]] = {}
     for ln in evidence.get("links", []):
@@ -116,6 +186,8 @@ def render_md(evidence: dict, title: str) -> str:
     for r in rows(evidence):
         if r["kind"] == "speech":
             lines.append(f'{ts(r["t"])}  SAID {r["who"]}: "{r["text"]}"  [{r["ids"][0]}]')
+            for pt in r["parts"]:
+                lines.append(f'         ↳ {pt["voice"] or "unknown"} from {ts(pt["start_ms"])}: "{pt["text"]}"')
             for ln in by_utt.get(r["ids"][0], []):
                 lines.append(f'         {link_text(ln)}')
             continue
@@ -187,7 +259,8 @@ def render_html(evidence: dict, title: str, video_src: str) -> str:
         by_utt.setdefault(ln["utterance"], []).append(ln)
     for r in rows(evidence):
         if r["kind"] == "speech":
-            lk = "".join(f'<div class="link">{esc(link_text(ln))}</div>' for ln in by_utt.get(r["ids"][0], []))
+            lk = "".join(f'<div class="link">↳ {esc(pt["voice"] or "unknown")} from {ts(pt["start_ms"])}: {esc(pt["text"])}</div>' for pt in r["parts"])
+            lk += "".join(f'<div class="link">{esc(link_text(ln))}</div>' for ln in by_utt.get(r["ids"][0], []))
             feed.append(f'<div class="row speech" data-t="{r["t"]}"><div class="t">{ts(r["t"])}</div><div><span class="who">{esc(r["who"])}</span><span class="txt">{esc(r["text"])}</span><span class="id">{r["ids"][0]}</span>{lk}</div></div>')
             continue
         evs = r["events"]
@@ -211,6 +284,8 @@ def render_html(evidence: dict, title: str, video_src: str) -> str:
         if s.get("frame")
     )
     extra = ""
+    if voices := summary(evidence):
+        extra += "<h3>Voices</h3>" + "".join(f"<div>{esc(v)}</div>" for v in voices)
     if evidence.get("checks"):
         extra += "<h3>Cross-checks</h3>" + "".join(f'<div class="sl" data-t="{c["t_ms"]}">{ts(c["t_ms"])} · <b>{CHECK[c["kind"]]}</b> {esc(c["text"])}</div>' for c in evidence["checks"])
     if evidence.get("slides"):

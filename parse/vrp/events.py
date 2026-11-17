@@ -12,6 +12,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 from rapidfuzz import fuzz
+from rapidfuzz.distance import Levenshtein
 
 from .slides import page_of
 
@@ -112,15 +113,41 @@ WORK: Path = Path(".")
 REGION: list[int] = [0, 0, 0, 0]
 TRACK: list[list] = []
 CURSOR_SCALE: float | None = None
+TOUCH: str | None = None  # why the screen looks like a touch screen
+PEOPLE: list[int] | None = None  # participant tiles of a meeting
 FPS = 30.0
 
 
 def setup(work: Path, meta: dict, track: list[list]) -> None:
     """Context of one video: where key frames are, the screen region, the cursor track."""
-    global WORK, REGION, TRACK, CURSOR_SCALE, FPS
+    global WORK, REGION, TRACK, CURSOR_SCALE, FPS, PEOPLE
     WORK, REGION, TRACK, CURSOR_SCALE, FPS = work, meta["regions"]["screen"], track, meta.get("cursor_scale"), meta["fps"]
+    PEOPLE = meta["regions"].get("people")
     _imgs.clear()
     _small.clear()
+
+
+STATUS_CLOCK = re.compile(r"^\d{1,2}[:.]\d{2}$")
+DESK_MENU = re.compile(r"^(File|Edit|View|Window|Help|Go)$")
+
+
+def touch_screen(screens: list[dict], region: list[int], cursor_scale: float | None) -> str | None:
+    """Why the recording looks like a phone or tablet screen (a guess, not a fact), or None. Only when no mouse cursor
+    was found: a portrait screen, or a mobile status bar - a clock alone at the top left, no desktop menu bar."""
+    if cursor_scale is not None:
+        return None
+    x0, y0, W, H = region
+    if H > W:
+        return "portrait screen"
+    for s in screens[:20]:
+        top = [t for t in s["texts"] if t["bbox"][1] + t["bbox"][3] <= y0 + 0.06 * H]
+        for c in top:
+            if STATUS_CLOCK.match(c["text"].strip()) and c["bbox"][0] < x0 + 0.3 * W:
+                cy0, cy1 = c["bbox"][1], c["bbox"][1] + c["bbox"][3]
+                row = [t for t in top if cy0 <= t["bbox"][1] + t["bbox"][3] / 2 <= cy1]
+                if not any(DESK_MENU.match(t["text"].strip()) for t in row):
+                    return "mobile status bar (a clock at the top left)"
+    return None
 
 
 def img(screen: dict) -> np.ndarray:
@@ -138,11 +165,21 @@ def key_ms(screen: dict) -> int:
 
 def cursor_at(t_ms: int) -> tuple[int, int] | None:
     pos = None
-    for t, x, y in TRACK:
+    for t, x, y, *_ in TRACK:
         if t > t_ms:
             break
         pos = (x, y) if x is not None else None
     return pos
+
+
+def shape_at(t_ms: int) -> str | None:
+    """Cursor shape at a moment: arrow, hand, text (I-beam), other; None - unknown."""
+    kind = None
+    for p in TRACK:
+        if p[0] > t_ms:
+            break
+        kind = p[3] if len(p) > 3 else None
+    return kind
 
 
 def cursor_box(pos) -> list[int] | None:
@@ -291,6 +328,34 @@ def patch(image: np.ndarray, box: list[int], dx: int = 0, dy: int = 0) -> np.nda
     return cv2.cvtColor(image[y:y + h, x:x + w], cv2.COLOR_BGR2GRAY).astype(np.float32)
 
 
+def look(prev_img: np.ndarray, cur_img: np.ndarray, box: list[int]) -> dict | None:
+    """How an area changed, in numbers anyone can check: mean brightness before -> after, and in the inner part (the
+    frame of a button left out) the share of what was drawn before that is still drawn after, and the reverse."""
+    a, b = patch(prev_img, box), patch(cur_img, box)
+    if a is None or b is None:
+        return None
+    out = {"light": [round(float(a.mean())), round(float(b.mean()))]}
+    h, w = a.shape
+    ia, ib = a[h // 5:h - h // 5, w // 5:w - w // 5], b[h // 5:h - h // 5, w // 5:w - w // 5]
+    da, db = np.abs(ia - np.median(ia)) > 25, np.abs(ib - np.median(ib)) > 25
+    if da.sum() >= 12:
+        out["kept"] = round(float((da & db).sum() / da.sum()), 2)
+    if db.sum() >= 12:
+        out["new"] = round(float((db & ~da).sum() / db.sum()), 2)
+    return out
+
+
+def look_words(lk: dict | None) -> str:
+    """lighter / darker, and what was drawn there vanishing or appearing (an icon gone on hover)."""
+    if not lk:
+        return ""
+    l0, l1 = lk["light"]
+    words = ["lighter" if l1 - l0 > 15 else "darker" if l0 - l1 > 15 else ""]
+    if lk.get("kept") is not None and lk["kept"] < 0.3:
+        words.append(f"the drawing inside is gone, {lk['kept']:.0%} of it left")
+    return ", ".join(w for w in words if w)
+
+
 def similarity(a: np.ndarray | None, b: np.ndarray | None) -> float:
     """Correlation of two patches of one size, independent of brightness and contrast."""
     if a is None or b is None:
@@ -357,23 +422,40 @@ def moved_from(prev_img: np.ndarray, cur_img: np.ndarray, box: list[int]) -> tup
     return dx, dy
 
 
-def tap_mark(area: list[int]) -> bool:
-    """A touch indicator on a phone recording: a round mark about a fingertip wide."""
+def tap_mark(area: list[int], prev_img: np.ndarray, cur_img: np.ndarray) -> bool:
+    """A touch indicator on a phone or tablet recording: a round mark about a fingertip wide. The change fills a disc
+    and stays inside it, so a key popup, an icon or a word of the same size is not a tap."""
     side = min(REGION[2], REGION[3])
-    w, h = area[2], area[3]
-    return 0.05 * side <= w <= 0.12 * side and 0.8 <= w / max(h, 1) <= 1.25
+    x, y, w, h = area
+    if not TOUCH:
+        return False  # a desktop with no cursor found: no touch indicator to look for
+    if not (0.05 * side <= w <= 0.12 * side and 0.8 <= w / max(h, 1) <= 1.25):
+        return False
+    a, b = (cv2.cvtColor(im[y:y + h, x:x + w], cv2.COLOR_BGR2GRAY).astype(int) for im in (prev_img, cur_img))
+    if a.shape != b.shape or a.size == 0:
+        return False
+    d = np.abs(a - b) > 12
+    yy, xx = np.mgrid[0:h, 0:w]
+    disc = ((xx + 0.5 - w / 2) / (w / 2)) ** 2 + ((yy + 0.5 - h / 2) / (h / 2)) ** 2 <= 1
+    return d[disc].mean() >= 0.45 and d[~disc].mean() <= 0.25
 
 
 def shifted(prev: dict, cur: dict, box: list[int]) -> bool:
-    """The container's texts are all in the previous state too, at another place: content moved, nothing changed."""
+    """The container's texts are all in the previous state too, at another place: content moved, nothing changed.
+    A text with the same pixels in the same place stayed, however OCR read it the two times ("prlvate", "private")."""
     mine = [c for c in cur["texts"] if inside(c["bbox"], box)]
     if not mine:
         return False
+    moved = False
     for c in mine:
-        p = next((p for p in prev["texts"] if same(p["text"], c["text"])), None)
-        if p is None:
+        if alike(patch(img(prev), c["bbox"]), patch(img(cur), c["bbox"])):
+            continue
+        ps = [p for p in prev["texts"] if same(p["text"], c["text"])]
+        if not ps:
             return False
-    return any(max(abs(a - b) for a, b in zip(next(p for p in prev["texts"] if same(p["text"], c["text"]))["bbox"][:2], c["bbox"][:2])) > 4 for c in mine)
+        p = min(ps, key=lambda p: abs(p["bbox"][0] - c["bbox"][0]) + abs(p["bbox"][1] - c["bbox"][1]))
+        moved = moved or max(abs(p["bbox"][0] - c["bbox"][0]), abs(p["bbox"][1] - c["bbox"][1])) > 4
+    return moved
 
 
 def near_cursor(box: list[int], screens: tuple[dict, dict]) -> bool:
@@ -436,6 +518,31 @@ def drop_ticking(events: list[dict]) -> list[dict]:
                                       and CLOCK.sub("#", norm(e["before"])) == CLOCK.sub("#", norm(e["after"])))]
 
 
+def drop_meters(events: list[dict], duration_ms: int) -> list[dict]:
+    """A text with digits that keeps changing in one place through the whole video (a menu bar clock with seconds, a
+    network or CPU meter) is an indicator: dropped. A progress counter changes for a while, not all the video."""
+    digits = lambda e: sum(ch.isdigit() for ch in (e.get("after") or e.get("text") or "")) >= 2
+    tc = [e for e in events if e["kind"] == "text_change" and digits(e)]
+    noisy: set[int] = set()
+    for e in tc:
+        same = [o for o in tc if iou(e["bbox"], o["bbox"]) > 0.5]
+        if len(same) >= 5 and max(o["t_ms"] for o in same) - min(o["t_ms"] for o in same) >= 0.5 * duration_ms:
+            noisy.update(id(o) for o in same)
+    return [e for e in events if id(e) not in noisy]
+
+
+def drop_noise(events: list[dict]) -> list[dict]:
+    """Not facts of the screen: a tile lighting up among the participants (the speakers pass reads that), and one or two
+    characters at the cursor while it moves (the arrow read as "4")."""
+    def glyph(e):
+        pos = cursor_at(e["t_ms"])
+        x, y, w, h = e["bbox"]
+        k = CURSOR_SCALE or 1
+        return pos is not None and len(norm(e.get("text") or "")) <= 2 and w <= 45 * k and h <= 70 * k and x - 20 <= pos[0] <= x + w + 20 and y - 20 <= pos[1] <= y + h + 20
+    return [e for e in events if not ((PEOPLE and e["kind"] == "visual_change" and inside(e["bbox"], PEOPLE))
+                                      or (e["kind"] in ("appear", "disappear") and e.get("bbox") and glyph(e)))]
+
+
 def drop_repeating(events: list[dict]) -> list[dict]:
     """A visual change that keeps coming back at one place is an indicator (the speaking tile, a blinking caret), not a
     fact about what happened."""
@@ -465,8 +572,89 @@ def collapse_typing(events: list[dict]) -> list[dict]:
     return out
 
 
+FIELD_GAP_MS = 6000
+CARET = re.compile(r"\s*[|]+\s*$|(?<=[^\w\s])I$")
+
+
+def field_edits(events: list[dict]) -> list[dict]:
+    """Typing that OCR reads badly: one single-line field whose text keeps changing by a character or two, emptied in
+    between ("1", "", "H", "M1", ";|") is one typing event with the values read, in order. A caret read as "|" at the
+    end (or "I" after a symbol) is left out. Digits alone changing ("12%" -> "34%") is a counter, not typing."""
+    def value(e):
+        v = "" if e["kind"] == "disappear" else (e.get("after") if e["kind"] == "text_change" else e.get("text")) or ""
+        return CARET.sub("", v).strip()
+
+    small = lambda b: b[3] <= max(60, 0.05 * REGION[3]) and b[2] <= 0.6 * REGION[2]
+    runs: list[dict] = []
+    for e in events:
+        if e["kind"] not in ("appear", "disappear", "text_change", "type") or not e.get("bbox") or not small(e["bbox"]) or len(value(e)) > 60:
+            continue
+        r = next((r for r in reversed(runs) if e["t_ms"] - r["t1"] <= FIELD_GAP_MS and iou(r["box"], e["bbox"]) > 0.5), None)
+        if r is None:
+            runs.append({"box": e["bbox"], "t1": e["t_ms"], "evs": [e]})
+        else:
+            r["evs"].append(e)
+            r["t1"] = e["t_ms"]
+    drop: set[int] = set()
+    out = list(events)
+    for r in runs:
+        evs = r["evs"]
+        first = evs[0].get("before") if evs[0]["kind"] == "text_change" else evs[0]["text"] if evs[0]["kind"] == "disappear" else ""
+        vals = [CARET.sub("", first or "").strip()] + [value(e) for e in evs]
+        vals = [v for i, v in enumerate(vals) if i == 0 or v != vals[i - 1]]
+        filled = [v for v in vals if v]
+        if len(evs) < 3 or len(vals) < 4 or len({re.sub(r"\d", "#", v) for v in filled}) < 2:
+            continue
+        if any(Levenshtein.distance(a, b) > 3 or same(a, b) and len(a) > 3 for a, b in zip(filled, filled[1:])):
+            continue  # a long text read differently each time it shows (a key-cast overlay) is not typing
+        drop.update(id(e) for e in evs)
+        out.append({"t_ms": evs[0]["t_ms"], "end_ms": evs[-1]["t_ms"], "kind": "type", "bbox": union([e["bbox"] for e in evs]), "text": filled[-1],
+                    "values": vals, "source": "ocr", "id": evs[0]["id"], "visible": True, "evidence": evs[0]["evidence"][:1] + evs[-1]["evidence"][-1:]})
+    return sorted((e for e in out if id(e) not in drop), key=lambda e: e["t_ms"])
+
+
+def off_cursor(screen: dict) -> dict:
+    """Texts of a state without the arrow itself, which OCR may read as a character ("4") where the cursor rests."""
+    pos = cursor_at(key_ms(screen))
+    if pos is None:
+        return screen
+    on = lambda b: b[0] <= pos[0] <= b[0] + b[2] and b[1] <= pos[1] <= b[1] + b[3]
+    return {**screen, "texts": [t for t in screen["texts"] if not (len(norm(t["text"])) <= 2 and on(t["bbox"]))]}
+
+
+def edges(box: list[int]) -> list[str] | None:
+    """The right or bottom screen edge a new element of three lines or more reaches: a menu running into it may be cut
+    off there (bars and notifications sit at the top). Something that spans the screen (a page, a panel) says nothing."""
+    x0, y0, W, H = REGION
+    x, y, w, h = box
+    if w * h > 0.5 * W * H or w >= 0.9 * W or h >= 0.9 * H:
+        return None
+    hit = [n for n, ok in (("right", x + w >= x0 + W - 2), ("bottom", y + h >= y0 + H - 2)) if ok]
+    return hit or None
+
+
+def beside(screen: dict, box: list[int]) -> str | None:
+    """The text on the same line right next to a small box with no text of its own: where a typed symbol OCR does not
+    read went ('right of "return zero, key)"')."""
+    x, y, w, h = box
+    if w > 3 * h:
+        return None
+    best = None
+    for t in screen["texts"]:
+        bx, by, bw, bh = t["bbox"]
+        if not y <= by + bh / 2 <= y + h or bh < 0.3 * h:
+            continue
+        gap = x - (bx + bw) if bx + bw <= x + w / 2 else bx - (x + w)
+        if -w <= gap <= 2 * h and (best is None or gap < best[0]):
+            best = (gap, t["text"], "right of" if bx + bw <= x + w / 2 else "left of")
+    return best and f'{best[2]} "{best[1]}"'
+
+
 def diff(screens: list[dict]) -> list[dict]:
+    global TOUCH
+    TOUCH = touch_screen(screens, REGION, CURSOR_SCALE)
     events = []
+    screens = [off_cursor(s) for s in screens]
 
     def add(**e):
         e["id"] = f"p{len(events) + 1:03d}"
@@ -531,7 +719,7 @@ def diff(screens: list[dict]) -> list[dict]:
         text_boxes = [x["bbox"] for x in added + removed]
         limit = MAX_CONTAINER * REGION[2] * REGION[3]
         for area in areas:
-            if CURSOR_SCALE is None and tap_mark(area):
+            if CURSOR_SCALE is None and tap_mark(area, prev_img, cur_img):
                 cx, cy = area[0] + area[2] // 2, area[1] + area[3] // 2
                 if not any(abs(e["at"][0] - cx) < 30 and abs(e["at"][1] - cy) < 30 and t - e["t_ms"] < 1500 for e in events if e["kind"] == "click"):
                     target = under_before(screens, prev["start_ms"], cx, cy, 1.0)
@@ -548,15 +736,15 @@ def diff(screens: list[dict]) -> list[dict]:
                 continue
             if near_cursor(box, (prev, cur)):
                 # hover or press feedback: not a fact by itself, but it tells a click (see cursor_events), then dropped
-                add(t_ms=t, kind="visual_change", bbox=box, text="", source="pixel", under_cursor=True, evidence=ev)
+                add(t_ms=t, kind="visual_change", bbox=box, text="", source="pixel", under_cursor=True, evidence=ev, look=look(prev_img, cur_img, box))
                 continue
             if any(iou(box, b) > 0.3 or inside(box, b) or inside(b, box) for b in boxes):
                 continue  # part of an element that appeared or changed at the same moment
             boxes.append(box)
             members = [c for c in cur["texts"] if inside(c["bbox"], box)]
-            add(t_ms=t, kind="visual_change", bbox=box, text=reading(members), source="pixel", evidence=ev)
+            add(t_ms=t, kind="visual_change", bbox=box, text=reading(members), source="pixel", evidence=ev, look=look(prev_img, cur_img, box))
 
-    events = collapse_typing(drop_repeating(drop_ticking(events)))
+    events = field_edits(collapse_typing(drop_repeating(drop_noise(drop_meters(drop_ticking(events), screens[-1]["end_ms"])))))
 
     # how long an appeared element was shown: until the first state where most of its own text is gone
     for e in events:
@@ -571,6 +759,12 @@ def diff(screens: list[dict]) -> list[dict]:
                 e["end_ms"] = s["start_ms"]
                 break
     events = drop_covered(events, screens)
+    for e in events:
+        if e["kind"] in ("appear", "screen_change") and e.get("bbox") and (e.get("text") or "").count(" | ") >= 2:
+            e["edge"] = edges(e["bbox"])
+        if e["kind"] == "visual_change" and not e.get("text") and not e.get("under_cursor"):
+            s = next((s for s in screens if s["start_ms"] == e["t_ms"]), None)
+            e["beside"] = s and beside(s, e["bbox"])
     raised = {e["t_ms"] for e in events if e["kind"] == "window_change"}
     events = [e for e in events if not (e["kind"] == "disappear" and e["t_ms"] in raised)]  # went behind the window
     for e in events:
@@ -651,6 +845,20 @@ def under(screen: dict | None, x: int, y: int, scale: float) -> dict | None:
     return best and best[1]
 
 
+def hover_looks(cursor_evs: list[dict], screen_events: list[dict]) -> None:
+    """A hover keeps what it did to the element under it (the icon faded, the row got lighter): the feedback itself is
+    dropped as a screen event, but how it looks can be the bug."""
+    for h in cursor_evs:
+        if h["kind"] != "point":
+            continue
+        x, y = h["at"]
+        near = [e for e in screen_events if e["kind"] == "visual_change" and e.get("look")
+                and h["t_ms"] - 300 <= e["t_ms"] <= (h["end_ms"] or h["t_ms"]) + 300 and inside([x, y, 0, 0], e["bbox"], 12)]
+        words = [w for w in (look_words(e["look"]) for e in near) if w]
+        if words:
+            h["reaction"] = max(words, key=len)
+
+
 def drop_under_hover(screen_events: list[dict], cursor_evs: list[dict], track: list[list]) -> list[dict]:
     """While the cursor wiggles over something, OCR and pixels along its path flicker ("Delivered" -> "Delivered Li"):
     small changes on that path during a hover are the cursor, not the screen."""
@@ -724,7 +932,7 @@ def cursor_events(track: list[list], scale: float | None, screens: list[dict], s
         target = under_before(screens, t0, x, y, scale)
         # the press is right before the screen reacts; the cursor may have rested a while before it
         t_click = max(t0, click_t - round(1000 / FPS))
-        out.append({"t_ms": t_click, "kind": "click", "bbox": target["bbox"] if target else [x - 4, y - 4, 8, 8], "at": [x, y], "text": target and target["text"], "source": "cursor", "stopped_at": t0})
+        out.append({"t_ms": t_click, "kind": "click", "bbox": target["bbox"] if target else [x - 4, y - 4, 8, 8], "at": [x, y], "text": target and target["text"], "source": "cursor", "stopped_at": t0, "cursor": shape_at(t_click)})
         clicked.append(t0)
 
     for r in wiggles(track, scale):
@@ -732,13 +940,238 @@ def cursor_events(track: list[list], scale: float | None, screens: list[dict], s
         tip = [r["x"] - 4, r["y"] - 4, 8, 8]
         # where it hovered: the text under most of the wiggle
         hits: dict[str, list] = {}
-        for _, x, y in r["pts"]:
-            u = under(state_at(t0), x, y, scale)
+        shapes: dict[str | None, int] = {}
+        for p in r["pts"]:
+            u = under(state_at(t0), p[1], p[2], scale)
             if u:
                 hits.setdefault(u["text"], [u, 0])[1] += 1
+            k = p[3] if len(p) > 3 else None
+            shapes[k] = shapes.get(k, 0) + 1
         u = max(hits.values(), key=lambda h: h[1])[0] if hits else None
-        out.append({"t_ms": t0, "end_ms": r["end_ms"], "kind": "point", "bbox": u["bbox"] if u else tip, "at": [r["x"], r["y"]], "text": u and u["text"], "source": "cursor"})
+        out.append({"t_ms": t0, "end_ms": r["end_ms"], "kind": "point", "bbox": u["bbox"] if u else tip, "at": [r["x"], r["y"]], "text": u and u["text"], "source": "cursor", "cursor": max(shapes, key=shapes.get)})
     for e in out:
         e.setdefault("end_ms", None)
         e.update(visible=True, evidence=[])
     return out
+
+
+# --- motion events ------------------------------------------------------------------------------------------------
+
+MOVE_MIN = 6  # px of the largest displacement (more on a large screen)
+MOVE_PX = 150  # changed px of the small frame the moves explain, over the whole episode
+SCROLL_AREA = 0.25  # share of the screen: content this large moving up or down was scrolled
+JOIN_MS = 400  # moves of one thing this close in time are one episode (a drag that lags, wheel notches)
+
+
+def touches(a: list[int], b: list[int], pad: int = 20) -> bool:
+    return a[0] - pad < b[0] + b[2] and b[0] < a[0] + a[2] + pad and a[1] - pad < b[1] + b[3] and b[1] < a[1] + a[3] + pad
+
+
+def episodes(moves: list[list]) -> list[dict]:
+    """Frame moves -> episodes: the same area moving again within JOIN_MS; one step per frame, the largest move."""
+    eps: list[dict] = []
+    for t, x, y, w, h, dx, dy, px in sorted(moves, key=lambda m: (m[0], -m[7])):
+        box = [x, y, w, h]
+        ep = next((e for e in reversed(eps) if 0 < t - e["t1"] <= JOIN_MS and touches(e["last"], box)), None)
+        if ep is None:
+            if any(e["t1"] == t and touches(e["last"], box) for e in eps):
+                continue  # a smaller piece of a move already taken in this frame
+            ep = {"t0": t, "box": box, "first": box, "steps": []}
+            eps.append(ep)
+        ep["steps"].append((t, dx, dy, px))
+        ep.setdefault("sizes", []).append((w, h))
+        ep.update(t1=t, last=box, box=union([ep["box"], box]))
+    return eps
+
+
+def way(dx: int, dy: int) -> str:
+    parts = [f"{abs(dx)} px {'right' if dx > 0 else 'left'}" if abs(dx) >= 3 else "", f"{abs(dy)} px {'down' if dy > 0 else 'up'}" if abs(dy) >= 3 else ""]
+    return " and ".join(p for p in parts if p) or "a few px"
+
+
+def follows(dx: int, dy: int, cx: int, cy: int) -> bool:
+    """The cursor moved along with the content: its step along the move is about as long (a slider thumb follows
+    only the horizontal part)."""
+    d = (dx * dx + dy * dy) ** 0.5
+    along = (cx * dx + cy * dy) / d if d else 0
+    return 0.6 * d - 3 <= along <= 1.6 * d + 3 and along >= 2
+
+
+def companion(eps: list[dict]) -> tuple[int, int] | None:
+    """A cursor highlight drawn by the recorder (a halo around the arrow): one size of thing following the cursor all
+    over the screen, in many episodes. -> its (w, h), or None. A slider thumb follows it too, but along one line."""
+    fol = [e for e in eps if e["follow"] >= 0.3 * len(e["steps"]) and e["size"][0] * e["size"][1] < 0.02 * REGION[2] * REGION[3]]
+    for e in fol:
+        w, h = e["size"]
+        same = [o for o in fol if abs(o["size"][0] - w) <= 0.25 * w and abs(o["size"][1] - h) <= 0.25 * h]
+        xs = [o["box"][0] + o["box"][2] / 2 for o in same]
+        ys = [o["box"][1] + o["box"][3] / 2 for o in same]
+        if len(same) >= 5 and max(xs) - min(xs) >= 0.25 * REGION[2] and max(ys) - min(ys) >= 0.25 * REGION[3]:
+            return w, h
+    return None
+
+
+def motion_events(motion: dict, screens: list[dict], screen_events: list[dict]) -> list[dict]:
+    """Moves, scrolls and drags from the frame moves. A move that ends where it started is said so ("21 px right and
+    back 33 ms later"); content that follows the cursor is a drag, with what changed after the drop. Content sliding
+    in or out as it appears or goes is the appearing, not a move."""
+    frame = 1000 / motion["fps"]
+    side = max(REGION[2], REGION[3])
+    least = max(MOVE_MIN, round(0.005 * side))
+    pad = 30 * (CURSOR_SCALE or 1)
+    shown = [e for e in screen_events if e["kind"] in ("appear", "disappear", "screen_change") and e.get("bbox")]
+
+    def state_at(t: int) -> dict | None:
+        return next((s for s in screens if s["start_ms"] <= t < s["end_ms"]), None)
+
+    def before(t: int) -> dict | None:
+        return next((s for s in reversed(screens) if s["start_ms"] < t), None)
+
+    eps = []
+    for ep in episodes(motion["moves"]):
+        cum, path = [0, 0], []
+        for _, dx, dy, _ in ep["steps"]:
+            cum = [cum[0] + dx, cum[1] + dy]
+            path.append(cum)
+        ep["path"] = path
+        ep["size"] = tuple(int(np.median([z[i] for z in ep["sizes"]])) for i in (0, 1))
+        ep["peak_i"] = max(range(len(path)), key=lambda i: path[i][0] ** 2 + path[i][1] ** 2)
+        peak = path[ep["peak_i"]]
+        if (peak[0] ** 2 + peak[1] ** 2) ** 0.5 < least or sum(s[3] for s in ep["steps"]) < MOVE_PX:
+            continue
+        box = ep["box"]
+        if any(e["t_ms"] - 400 <= ep["t1"] and ep["t0"] <= e["t_ms"] + 400 and inside(box, e["bbox"]) and e["bbox"][2] * e["bbox"][3] >= 0.5 * box[2] * box[3] for e in shown):
+            continue
+        ep["follow"] = 0
+        if CURSOR_SCALE:
+            for t, dx, dy, _ in ep["steps"]:
+                a, b = cursor_at(round(t - frame)), cursor_at(t)
+                if a and b and follows(dx, dy, b[0] - a[0], b[1] - a[1]) and touches(box, [b[0], b[1], 0, 0], pad):
+                    ep["follow"] += 1
+        eps.append(ep)
+    halo = companion(eps)
+    out = []
+    for ep in eps:
+        box, path, peak_i = ep["box"], ep["path"], ep["peak_i"]
+        if halo and sum(abs(w - halo[0]) <= 0.3 * halo[0] and abs(h - halo[1]) <= 0.3 * halo[1] for w, h in ep["sizes"]) >= 0.5 * len(ep["sizes"]):
+            continue
+        peak, net = path[peak_i], path[-1]
+        size = (peak[0] ** 2 + peak[1] ** 2) ** 0.5
+        back = len(path) > 1 and (net[0] ** 2 + net[1] ** 2) ** 0.5 <= max(3, 0.25 * size)
+        s0 = before(ep["t0"])
+        texts = [t for t in (s0["texts"] if s0 else []) if inside(t["bbox"], box)]
+        e = {"t_ms": ep["t0"], "end_ms": ep["t1"], "bbox": box, "text": reading(texts)[:200], "dx": net[0], "dy": net[1],
+             "peak": peak, "back": back, "frames": len(path), "source": "pixel",
+             "evidence": [x["frame"] for x in (s0, state_at(ep["t1"] + 1)) if x and x.get("frame")]}
+        if back:
+            e["back_ms"] = ep["t1"] - ep["steps"][peak_i][0]
+        if len(path) >= 2 and ep["follow"] >= 0.5 * len(path):
+            e["kind"] = "drag"
+            start, end = cursor_at(round(ep["t0"] - frame)), cursor_at(ep["t1"])
+            e["at"], e["to"] = list(start) if start else None, list(end) if end else None
+            if start and s0:
+                own = [t for t in s0["texts"] if inside(t["bbox"], ep["first"], 4)]
+                what = min(own, key=lambda t: abs(t["bbox"][0] + t["bbox"][2] / 2 - start[0]) + abs(t["bbox"][1] + t["bbox"][3] / 2 - start[1]), default=None)
+                e["text"] = (what or under(s0, start[0], start[1], CURSOR_SCALE) or {"text": ""})["text"]
+            onto = end and under(s0, end[0], end[1], CURSOR_SCALE)
+            e["onto"] = onto and onto["text"]
+        elif box[2] * box[3] >= SCROLL_AREA * REGION[2] * REGION[3] and abs(peak[1]) >= 2 * abs(peak[0]):
+            e["kind"] = "scroll"
+        else:
+            e["kind"] = "move"
+        out.append(e)
+    for e in out:
+        if e["kind"] == "drag":
+            after = [x for x in screen_events + out if x is not e and e["end_ms"] < x["t_ms"] <= e["end_ms"] + 1500 and x["kind"] not in ("click", "point") and not x.get("under_cursor")]
+            e["after"] = "; ".join(f'{x["kind"]} "{(x.get("text") or "")[:60]}"' for x in after[:3])
+        e["visible"] = True
+    return out
+
+
+FLICKER_BACK_MS = 400  # a look coming back this soon is a toggle, not a slow change (a caret blinks every 0.5 s)
+FLICKER_GAP_MS = 700
+FLICKER_MIN = 4  # toggles
+
+
+def flicker_events(motion: dict, screens: list[dict]) -> list[dict]:
+    """One place going back to how it looked a moment ago, again and again: one event with the count and the span.
+    The cursor switching between two shapes the same way, some of the times while not moving, is one too (from the
+    tracked shapes)."""
+    k = CURSOR_SCALE or 1
+    runs: list[dict] = []
+    for t, x, y, w, h, back in motion["changes"]:
+        if not 0 < back <= FLICKER_BACK_MS or min(w, h) < 6 * k:
+            continue
+        box = [x, y, w, h]
+        r = next((r for r in reversed(runs) if t - r["t1"] <= FLICKER_GAP_MS and (iou(r["box"], box) > 0.3 or inside(box, r["box"]) or inside(r["box"], box))), None)
+        if r is None:
+            runs.append({"t0": t, "t1": t, "box": box, "n": 1})
+            continue
+        if t != r["t1"]:
+            r["n"] += 1
+        r.update(t1=t, box=union([r["box"], box]))
+    out = []
+    for r in runs:
+        if r["n"] < FLICKER_MIN or r["box"][2] * r["box"][3] > MAX_DIALOG * REGION[2] * REGION[3]:
+            continue
+        s = next((s for s in reversed(screens) if s["start_ms"] <= r["t0"]), None)
+        texts = [t for t in (s["texts"] if s else []) if inside(t["bbox"], r["box"])]
+        out.append({"t_ms": r["t0"], "end_ms": r["t1"], "kind": "flicker", "bbox": r["box"], "text": reading(texts)[:200], "count": r["n"],
+                    "source": "pixel", "evidence": [s["frame"]] if s and s.get("frame") else []})
+    pts = [p for p in TRACK if p[1] is not None and len(p) > 3 and p[3]]
+    flips = [(a[3], b) for a, b in zip(pts, pts[1:]) if b[3] != a[3]]
+    groups: list[list] = []
+    for f in flips:
+        if groups and f[1][0] - groups[-1][-1][1][0] <= FLICKER_GAP_MS:
+            groups[-1].append(f)
+        else:
+            groups.append([f])
+    for g in groups:
+        run = [b for _, b in g]
+        seen = [g[0][0]] + [b[3] for b in run]
+        kinds = sorted(set(seen), key=lambda x: -seen.count(x))
+        if len(g) < 2 * FLICKER_MIN or sum(seen.count(x) for x in kinds[:2]) < 0.8 * len(seen):
+            continue
+        still = sum(abs(q[1] - p[1]) + abs(q[2] - p[2]) <= 4 * k for p, q in zip(run, run[1:]))
+        if still < 3:
+            continue  # moving over text and links changes the shape by itself
+        out.append({"t_ms": run[0][0], "end_ms": run[-1][0], "kind": "flicker", "bbox": union([[p[1] - 4, p[2] - 4, 8, 8] for p in run]),
+                    "text": "", "count": len(run), "cursor": kinds[:2], "still": still, "source": "cursor", "evidence": []})
+    for e in out:
+        e["visible"] = True
+    return out
+
+
+def jumps(screen_events: list[dict]) -> list[dict]:
+    """A menu that jumps far away at once: at one moment its lines go away in one place and come up in another. The
+    lines that went are explained by the move: one move event (the jump) instead of their disappearing."""
+    out, gone = [], set()
+    by_t: dict[int, list[dict]] = {}
+    for e in screen_events:
+        by_t.setdefault(e["t_ms"], []).append(e)
+    for t, evs in by_t.items():
+        for a in (e for e in evs if e["kind"] == "appear" and e.get("bbox") and e.get("text")):
+            lines = [norm(x) for x in a["text"].split(" | ")]
+            gone_here = [d for d in evs if d["kind"] == "disappear" and d.get("bbox") and d.get("text") and id(d) not in gone and not inside(d["bbox"], a["bbox"])]
+            went_lines = [norm(x) for d in gone_here for x in d["text"].split(" | ")]
+            went = [d for d in gone_here if any(fuzz.ratio(norm(x), ln) >= 80 for x in d["text"].split(" | ") for ln in lines)]
+            kept = sum(any(fuzz.ratio(ln, w) >= 80 for w in went_lines) for ln in lines)
+            # most lines of the new element, three or more, were there a moment ago: a file picked from a list and
+            # shown in a chat is not the list moving (the new menu may show fewer lines: cut off by the screen edge)
+            if kept < 3 or kept < 0.6 * len(lines):
+                continue
+            src = union([d["bbox"] for d in went])
+            gone.update(id(d) for d in went)
+            dx, dy = a["bbox"][0] - src[0], a["bbox"][1] - src[1]
+            out.append({"t_ms": t, "end_ms": t, "kind": "move", "bbox": a["bbox"], "from": src, "text": a["text"], "dx": dx, "dy": dy, "peak": [dx, dy],
+                        "back": False, "frames": 1, "source": "ocr", "visible": True, "evidence": a.get("evidence", [])})
+    return [e for e in screen_events if id(e) not in gone] + out
+
+
+def drop_flickering(screen_events: list[dict], flickers: list[dict]) -> list[dict]:
+    """Events at a flickering place during the flicker are its toggles: the flicker event says it once."""
+    def hit(e):
+        b = e.get("bbox")
+        return b and e["kind"] in ("appear", "disappear", "visual_change", "text_change") and any(
+            f["source"] == "pixel" and f["t_ms"] - 100 <= e["t_ms"] <= f["end_ms"] + 100 and (inside(b, f["bbox"]) or iou(b, f["bbox"]) > 0.3) for f in flickers)
+    return [e for e in screen_events if not hit(e)]

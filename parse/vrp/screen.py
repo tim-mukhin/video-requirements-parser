@@ -10,10 +10,10 @@ from pathlib import Path
 
 import cv2
 import numpy as np
-from ocrmac import ocrmac
 from PIL import Image
 
 from . import cursor as cur
+from . import ocr as engine
 from . import regions
 
 SMALL_W = 960
@@ -59,11 +59,11 @@ def scan(video: Path, frames_dir: Path) -> tuple[list[dict], dict, list[list]]:
     sx, sy, sw, sh = reg["screen"]
     k = SMALL_W / max(sw, sh)
     size = (round(sw * k), round(sh * k))
-    cal = cur.calibrate(samples)
-    tracker = cur.Tracker(cal[0], cal[1], min(W, H)) if cal else None
+    found = cur.sprites(video, samples, reg["screen"])
+    tracker = cur.Tracker(*found, min(W, H)) if found else None
 
     segs: list[dict] = []
-    track: list[list] = []  # [t_ms, x, y] when the cursor position changes; x, y = None - not found
+    track: list[list] = []  # [t_ms, x, y, shape] when the cursor moves or changes shape; x, y = None - not found
     prev = key_g = None
     prev_box = key_box = None
     run_start = 0
@@ -81,8 +81,9 @@ def scan(video: Path, frames_dir: Path) -> tuple[list[dict], dict, list[list]]:
             pos = tracker.update(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY), moved, force_global=i % GLOBAL_EVERY == 0)
             box = tracker.box(pos)
             t = round(i / fps * 1000)
-            if not track or (track[-1][1], track[-1][2]) != (pos or (None, None)):
-                track.append([t, *(pos or (None, None))])
+            p = [*pos, tracker.kind] if pos else [None, None, None]
+            if not track or track[-1][1:] != p:
+                track.append([t, *p])
         changed = False
         if prev is not None:
             changed = any(a >= MIN_AREA for a in blobs(cut(raw, (box, prev_box), k, sx, sy))[:, 4])
@@ -102,23 +103,13 @@ def scan(video: Path, frames_dir: Path) -> tuple[list[dict], dict, list[list]]:
     cap.release()
     if segs and segs[-1]["end"] is None:
         segs[-1]["end"] = i
-    meta = {"width": W, "height": H, "fps": fps, "duration_ms": round(max(i, n_total) / fps * 1000), "cursor_scale": cal and round(cal[0], 3), "regions": reg}
+    meta = {"width": W, "height": H, "fps": fps, "duration_ms": round(max(i, n_total) / fps * 1000), "cursor_scale": tracker and round(tracker.scale, 3), "cursor_shapes": tracker and [s["kind"] for s in tracker.sprites], "regions": reg}
     states = [{"start_ms": round(s["start"] / fps * 1000), "end_ms": round(s["end"] / fps * 1000), "frame": s["frame"]} for s in segs]
     return states, meta, track
 
 
-OCR_LANGS = {"en": ["en-US"], "ru": ["ru-RU", "en-US"]}
 OCR_MIN_SIDE = 1080
-
-
 OVERLAP = 120  # px shared by the two halves
-
-
-def _read(img: Image.Image, lang: str) -> list[tuple[str, list[float]]]:
-    """Apple Vision on one image -> (text, [x, y, w, h] in its pixels)."""
-    W, H = img.size
-    res = ocrmac.OCR(img, language_preference=OCR_LANGS[lang], recognition_level="accurate").recognize()
-    return [(t.strip(), [x * W, (1 - y - h) * H, w * W, h * H]) for t, c, (x, y, w, h) in res if c >= 0.3 and t.strip()]
 
 
 def ocr(path: str, lang: str, region: list[int]) -> list[dict]:
@@ -126,7 +117,8 @@ def ocr(path: str, lang: str, region: list[int]) -> list[dict]:
 
     Vision reads the whole region well but may drop whole columns of a wide, sparse screen (a file list with Owner,
     Modified, Size). So the region is also read in two overlapping halves along its long side; when they find clearly
-    more, their texts are added where the whole-region pass found nothing - a line is never stitched from cut pieces."""
+    more, their texts are added where the whole-region pass found nothing - a line is never stitched from cut pieces.
+    RapidOCR keeps such columns, so it reads the whole region once."""
     rx, ry, rw, rh = region
     img = Image.open(path).crop((rx, ry, rx + rw, ry + rh))
     f = 1.0
@@ -134,14 +126,16 @@ def ocr(path: str, lang: str, region: list[int]) -> list[dict]:
         f = OCR_MIN_SIDE / min(rw, rh)
         img = img.resize((round(rw * f), round(rh * f)), Image.LANCZOS)
     W, H = img.size
-    base = [{"text": t, "b": b} for t, b in _read(img, lang)]
+    base = [{"text": t, "b": b} for t, b in engine.read(img, lang)]
+    if not engine.SPLIT:
+        return [{"bbox": [rx + round(b[0] / f), ry + round(b[1] / f), round(b[2] / f), round(b[3] / f)], "text": t["text"]} for t in base for b in [t["b"]]]
     wide = W >= H
     half = (W if wide else H) // 2
     extra: list[dict] = []
     found = 0
     for lo, hi in ((0, half + OVERLAP), (half - OVERLAP, W if wide else H)):
         box = (lo, 0, hi, H) if wide else (0, lo, W, hi)
-        for t, (x, y, w, h) in _read(img.crop(box), lang):
+        for t, (x, y, w, h) in engine.read(img.crop(box), lang):
             found += 1
             b = [x + box[0], y + box[1], w, h]
             if not any(_overlap(b, o["b"]) > 0.2 for o in base + extra):

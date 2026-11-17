@@ -2,7 +2,8 @@
 
 The meeting window around the shared screen is dark and does not change; participant tiles sit on that dark background.
 Pixels that are dark in every sample frame are the window; the shared screen is the box of the largest connected area
-that is not. When that box covers almost the whole frame, or a light strip outside it runs along the frame edge (a desktop menu bar
+that is not. A shared screen is a solid rectangle of at least half the frame; anything else (dark panels of a dark
+theme app) is a plain screen recording. When that box covers almost the whole frame, or a light strip outside it runs along the frame edge (a desktop menu bar
 above a meeting app), the video is a plain screen recording and the whole frame is the screen.
 """
 import cv2
@@ -18,10 +19,14 @@ def detect(samples: list[np.ndarray]) -> dict:
     s = np.stack([cv2.resize(g, (W // STEP, H // STEP), interpolation=cv2.INTER_AREA) for g in samples])
     chrome = (s.max(0) < DARK) & (s.max(0).astype(int) - s.min(0) < 12)
     content = cv2.morphologyEx((~chrome).astype(np.uint8), cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
-    n, _, st, _ = cv2.connectedComponentsWithStats(content)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(content)
     if n < 2:
         return {"screen": [0, 0, W, H], "people": None}
     j = 1 + int(np.argmax(st[1:, 4]))
+    bx, by, bw, bh = st[j, :4]
+    box = lab[by:by + bh, bx:bx + bw] == j
+    if bw * bh < 0.5 * content.size or (box.mean(1) < 0.97).any() or (box.mean(0) < 0.97).any():
+        return {"screen": [0, 0, W, H], "people": None}
     x, y, w, h = (int(v) * STEP for v in st[j, :4])
     x, y, w, h = max(0, x), max(0, y), min(W - x, w), min(H - y, h)
     if w * h >= 0.9 * W * H:
