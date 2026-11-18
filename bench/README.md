@@ -36,7 +36,9 @@ timeline (83%), every frame around short events among the watcher's frames (79%,
 
 Found and fixed on the way: the parser counted time as frame number / fps, and 31 of 55 recordings write frames
 unevenly - times were off by up to 3.9 s; a status shown for one frame (25 ms) was merged into the next screen state.
-The rerun with both fixed is in progress when this was saved.
+The rerun with both fixed (`current` in `judgements.json`): 83%, the same; on the 31 re-timed recordings 80 -> 82%,
+within the spread - the investigator takes its times mostly from the watcher's frames, which always used the real
+time. The scheme stays at 82-83% across prompt, evidence, model and timing changes.
 
 Two lessons for anyone measuring an agent this way:
 - A subset picked because it failed improves on a rerun without any change (regression to the mean): 14 failing
