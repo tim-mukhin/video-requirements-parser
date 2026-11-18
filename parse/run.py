@@ -28,6 +28,7 @@ from pathlib import Path
 from vrp import checks as checks_pass
 from vrp import events as ev_pass
 from vrp import links as links_pass
+from vrp import moments as moments_pass
 from vrp import motion as motion_pass
 from vrp import ocr as ocr_engine
 from vrp import slides as slides_pass
@@ -40,7 +41,7 @@ from vrp.timeline import crops, render_html, render_md
 
 OUT = Path(__file__).resolve().parents[1] / "out"
 FILES = {"speech": "10-speech.json", "screens": "30-screens.json", "motion": "50-motion.json", "events": "60-events.json", "links": "70-links.json", "speakers": "80-speakers.json", "voices": "85-voices.json", "slides": "90-slides.json", "checks": "95-checks.json"}
-VERSIONS = {"speech": 2, "screens": 10, "motion": 1, "events": 32, "links": 4, "speakers": 2, "voices": 2, "slides": 2, "checks": 5}
+VERSIONS = {"speech": 2, "screens": 11, "motion": 2, "events": 33, "links": 4, "speakers": 2, "voices": 2, "slides": 2, "checks": 5}
 
 
 def sha(path: Path) -> str:
@@ -52,7 +53,8 @@ def sha(path: Path) -> str:
 
 
 def steady(video: Path, work: Path) -> Path:
-    """The video the frame passes read: as is, or re-timed to a steady 30 fps when frame number / fps is not the time
+    """The video the frame passes read: as is, or re-timed to a steady 30 fps (60 when the video has more than 32 frames
+    a second, so a frame shown for 25 ms is not skipped) when frame number / fps is not the time
     (variable frame rate screen recorders: GNOME writes webm that claims 1000 fps and phones drop frames)."""
     import av
     import cv2
@@ -61,7 +63,12 @@ def steady(video: Path, work: Path) -> Path:
     cap.release()
     with av.open(str(video)) as c:
         dur = float(c.duration or 0) / 1e6
-    if 0 < fps <= 240 and n > 0 and abs(n / fps - dur) <= max(0.1, 0.02 * dur):
+        vs = c.streams.video[0]
+        pts = sorted(float(p.pts * vs.time_base) for p in c.demux(vs) if p.pts is not None)
+    # the frame passes take frame i to be at i / fps: fine only if the real frame times keep to that grid (phones and
+    # screen recorders write frames unevenly while the average rate looks right - off by seconds in a minute)
+    drift = max((abs(t - pts[0] - k / fps) for k, t in enumerate(pts)), default=0.0) if 0 < fps <= 240 else 1e9
+    if 0 < fps <= 240 and n > 0 and abs(n / fps - dur) <= max(0.1, 0.02 * dur) and drift <= 0.1:
         return video
     out = work / "steady.mp4"
     if out.exists() and out.stat().st_mtime >= video.stat().st_mtime:
@@ -69,7 +76,8 @@ def steady(video: Path, work: Path) -> Path:
     tmp = out.with_suffix(".part.mp4")
     with av.open(str(video)) as src, av.open(str(tmp), "w") as dst:
         vs = src.streams.video[0]
-        enc = dst.add_stream("libx264", rate=30, options={"crf": "12", "preset": "fast"})
+        rate = 60 if len(pts) > 32 * max(dur, 1e-3) else 30
+        enc = dst.add_stream("libx264", rate=rate, options={"crf": "12", "preset": "fast"})
         enc.width, enc.height, enc.pix_fmt = vs.codec_context.width // 2 * 2, vs.codec_context.height // 2 * 2, "yuv420p"
         k, last = 0, None
 
@@ -80,11 +88,11 @@ def steady(video: Path, work: Path) -> Path:
             k += 1
 
         for fr in src.decode(vs):
-            t = float(fr.pts * vs.time_base) if fr.pts is not None else k / 30
-            while last is not None and k / 30 < t:
+            t = float(fr.pts * vs.time_base) if fr.pts is not None else k / rate
+            while last is not None and k / rate < t:
                 put(last)
             last = fr.to_ndarray(width=enc.width, height=enc.height, format="rgb24")
-        while last is not None and k / 30 < dur:
+        while last is not None and k / rate < dur:
             put(last)
         dst.mux(enc.encode())
     tmp.replace(out)
@@ -165,7 +173,7 @@ def run(key: str, variant: str | None, force: set[str], no_speech: bool = False,
     sc = step("screens", ocr_engine.ENGINE, screens)
     meta = sc["meta"]
 
-    mo = step("motion", passes["screens"]["key"], lambda: motion_pass.scan(steady(video, work), meta["regions"]["screen"], sc["cursor"], meta.get("cursor_scale")))
+    mo = step("motion", passes["screens"]["key"], lambda: motion_pass.scan(steady(video, work), meta["regions"]["screen"], sc["cursor"], meta.get("cursor_scale"), work / "frames" / "transients"))
 
     def events():
         ev_pass.setup(work, meta, sc["cursor"])
@@ -175,7 +183,7 @@ def run(key: str, variant: str | None, force: set[str], no_speech: bool = False,
         screen_events = ev_pass.drop_under_hover([e for e in screen_events if not e.get("under_cursor")], cursor_events, sc["cursor"])
         flickers = ev_pass.flicker_events(mo, sc["screens"])
         screen_events = ev_pass.jumps(ev_pass.drop_flickering(screen_events, flickers))
-        motion_events = ev_pass.motion_events(mo, sc["screens"], screen_events)
+        motion_events = ev_pass.motion_events(mo, sc["screens"], screen_events) + ev_pass.transient_events(mo, lang)
         out = sorted(screen_events + cursor_events + motion_events + flickers, key=lambda e: (e["t_ms"], e["kind"]))
         for i, e in enumerate(out):
             e["id"] = f"p{i + 1:03d}"
@@ -211,6 +219,10 @@ def run(key: str, variant: str | None, force: set[str], no_speech: bool = False,
     evidence["links"] = step("links", f'{passes.get("speech", {}).get("key")}|{passes["events"]["key"]}', lambda: links_pass.build(evidence, words_lang))
     evidence["checks"] = step("checks", f'{passes.get("speech", {}).get("key")}|{passes["events"]["key"]}|{no_speech}', lambda: checks_pass.build(evidence, work, words_lang, speech=not no_speech))
     crops(evidence, work)
+    made = moments_pass.build(video, evidence, work)
+    for e in evidence["events"]:
+        if e["id"] in made:
+            e["moment"] = made[e["id"]]
     dump(work / "evidence.json", evidence)
     title = " · ".join([key, *filter(None, (variant, tag))])
     (work / "timeline.md").write_text(render_md(evidence, title), encoding="utf-8")

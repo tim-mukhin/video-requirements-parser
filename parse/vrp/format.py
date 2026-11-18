@@ -98,6 +98,7 @@ EventKind = Literal[
     "scroll",  # a large area moved up or down
     "drag",  # content followed the cursor (at -> to, onto, after: what changed after the drop)
     "flicker",  # one place going back and forth between two looks, or the cursor between two shapes (count)
+    "transient",  # a look that lasted one or two frames between two changes of an area (frames, OCR text of it)
 ]
 
 
@@ -117,6 +118,7 @@ class Event(TypedDict):
     at: NotRequired[list[int]]  # click, point: the cursor tip or the touch centre
     cursor: NotRequired[str | None]  # click, point: cursor shape - arrow, hand, text (I-beam), other
     look: NotRequired[dict]  # visual_change: {"light": [before, after], "contrast": [before, after]}, gray 0-255
+    moment: NotRequired[str]  # frames/moments/<id>.jpg: every frame around a short event, cropped and enlarged
     reaction: NotRequired[str]  # point: how the element under the hover changed ("faded, contrast 40 → 3: ...")
 
 

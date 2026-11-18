@@ -4,6 +4,8 @@ The screen states see only stable frames, so a menu that jumps and settles, a pa
 that blinks while dragged are invisible there. Here every frame is compared with the one before at small size, the
 cursor left out; each changed area is tested for a shift (phase correlation, then the shift must explain most of the
 changed pixels, with a clear correlation peak) and for a return to a look it had up to a second ago (a blink, a flicker).
+A look that lasts one or two frames between two changes of the same area (a status that flashes past, a menu shown
+whole for a frame before it jumps) is kept as a transient, with a full-size crop of that frame for OCR.
 """
 from pathlib import Path
 
@@ -17,6 +19,8 @@ EXPLAINED = 0.7  # share of the changed px a shift must explain
 HISTORY_MS = 1000  # how far back to look for a return
 SAME = 0.02  # share of differing px for two looks to be one
 PEAK = 0.3  # phase correlation peak; text lines and icons that only look alike give a weak one
+TRANSIENT_FRAMES = 2  # a look that lasts at most this many frames between two changes of one area
+MAX_TRANSIENTS = 40
 
 
 def shift_of(a: np.ndarray, b: np.ndarray, changed: np.ndarray) -> tuple[int, int] | None:
@@ -43,7 +47,11 @@ def shift_of(a: np.ndarray, b: np.ndarray, changed: np.ndarray) -> tuple[int, in
     return (int(dx), int(dy)) if good.sum() >= EXPLAINED * len(ys) else None
 
 
-def scan(video: Path, region: list[int], track: list[list], cursor_scale: float | None) -> dict:
+def overlap(a, b) -> bool:
+    return a[0] < b[0] + b[2] and b[0] < a[0] + a[2] and a[1] < b[1] + b[3] and b[1] < a[1] + a[3]
+
+
+def scan(video: Path, region: list[int], track: list[list], cursor_scale: float | None, crops: Path | None = None) -> dict:
     """-> {"fps", "moves": [[t_ms, x, y, w, h, dx, dy, px]], "changes": [[t_ms, x, y, w, h, back_ms]]}, boxes and shifts
     in full-frame px. Pieces of one frame that moved by the same shift are one move (a scrolled page is many text
     lines); px - changed pixels of the small frame it explains. back_ms > 0: the area now looks as it did that long
@@ -58,8 +66,14 @@ def scan(video: Path, region: list[int], track: list[list], cursor_scale: float 
     for p in track:
         pos[p[0]] = (p[1], p[2])
     times = sorted(pos)
-    moves, changes = [], []
+    moves, changes, transients = [], [], []
     hist: list[np.ndarray] = []
+    recent: list[np.ndarray] = []  # the last few frames at full size, for the crop of a transient
+    boxes_at: dict[int, list] = {}  # frame index -> changed boxes (small frame)
+    if crops:
+        crops.mkdir(parents=True, exist_ok=True)
+        for f in crops.glob("*.jpg"):
+            f.unlink()
     keep = max(3, round(fps * HISTORY_MS / 1000))
     i, ti, cur_pos = 0, 0, None
     prev = prev_pos = None
@@ -103,14 +117,39 @@ def scan(video: Path, region: list[int], track: list[list], cursor_scale: float 
                                 back = round((len(hist) - j) * 1000 / fps)
                                 break
                     changes.append([t, *full, back])
+                    boxes_at.setdefault(i, []).append((x, y, w, h, full))
                 for d, parts in shifts.items():
                     x0, y0 = min(p[0] for p in parts), min(p[1] for p in parts)
                     x1, y1 = max(p[0] + p[2] for p in parts), max(p[1] + p[3] for p in parts)
                     moves.append([t, rx + round(x0 / k), ry + round(y0 / k), round((x1 - x0) / k), round((y1 - y0) / k), round(d[0] / k), round(d[1] / k), sum(p[4] for p in parts)])
+        # a transient: an area changed at frame i - n and changes again now, and had not been changing before that
+        for x, y, w, h, fb in boxes_at.get(i, []) if crops and len(transients) < MAX_TRANSIENTS * 3 else []:
+            for n in range(1, TRANSIENT_FRAMES + 1):
+                first = [b for b in boxes_at.get(i - n, []) if overlap(b[:4], (x, y, w, h))]
+                if first and len(recent) >= n:
+                    bx = [min(fb[0], first[0][4][0]), min(fb[1], first[0][4][1])]
+                    bx += [max(fb[0] + fb[2], first[0][4][0] + first[0][4][2]) - bx[0], max(fb[1] + fb[3], first[0][4][1] + first[0][4][3]) - bx[1]]
+                    img = recent[-n]  # recent[-1] is frame i - 1: the transient look is frames i - n .. i - 1
+                    pad = 12
+                    c = img[max(0, bx[1] - pad):bx[1] + bx[3] + pad, max(0, bx[0] - pad):bx[0] + bx[2] + pad]
+                    name = crops / f"{round((i - n) / fps * 1000):07d}-{bx[0]}-{bx[1]}.jpg"
+                    if c.size:
+                        cv2.imwrite(str(name), c, [cv2.IMWRITE_JPEG_QUALITY, 92])
+                        transients.append([round((i - n) / fps * 1000), *bx, n, name.name])
+                    break
         hist.append(g)
         if len(hist) > keep:
             hist.pop(0)
+        recent.append(frame)
+        if len(recent) > TRANSIENT_FRAMES + 2:
+            recent.pop(0)
+        boxes_at.pop(i - 6, None)
         prev, prev_pos = g, cur_pos
         i += 1
     cap.release()
-    return {"fps": fps, "moves": moves, "changes": changes}
+    # many transients in one place are an animation or a playing video, not a flash: keep the isolated ones
+    lone = [tr for tr in transients if sum(overlap(tr[1:5], o[1:5]) and abs(tr[0] - o[0]) < 1000 for o in transients) <= 4][:MAX_TRANSIENTS]
+    for tr in transients:
+        if tr not in lone and crops:
+            (crops / tr[6]).unlink(missing_ok=True)
+    return {"fps": fps, "moves": moves, "changes": changes, "transients": lone}

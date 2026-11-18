@@ -1093,6 +1093,28 @@ FLICKER_GAP_MS = 700
 FLICKER_MIN = 4  # toggles
 
 
+def transient_events(motion: dict, lang: str) -> list[dict]:
+    """A look that lasted one or two frames between two changes of an area: what it read, from a full-size crop."""
+    from PIL import Image
+
+    from . import ocr as ocr_engine
+
+    frame = 1000 / motion["fps"]
+    out = []
+    for t, x, y, w, h, n, crop in motion.get("transients", []):
+        path = WORK / "frames" / "transients" / crop
+        if not path.exists():
+            continue
+        img = Image.open(path)
+        f = max(1.0, 64 / max(1, min(img.size)))
+        if f > 1:
+            img = img.resize((round(img.width * f), round(img.height * f)), Image.LANCZOS)
+        text = " | ".join(tx for tx, _ in ocr_engine.read(img, lang))
+        out.append({"t_ms": t, "end_ms": round(t + n * frame), "kind": "transient", "bbox": [x, y, w, h], "text": text,
+                    "frames": n, "source": "pixel", "evidence": [path.relative_to(WORK).as_posix()]})
+    return out
+
+
 def flicker_events(motion: dict, screens: list[dict]) -> list[dict]:
     """One place going back to how it looked a moment ago, again and again: one event with the count and the span.
     The cursor switching between two shapes the same way, some of the times while not moving, is one too (from the

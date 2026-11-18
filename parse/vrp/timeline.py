@@ -23,6 +23,7 @@ LABEL = {
     "point": "HOVER",
     "key": "KEY",
     "type": "TYPED",
+    "transient": "FOR A MOMENT",
     "move": "MOVED",
     "scroll": "SCROLLED",
     "drag": "DRAG",
@@ -114,6 +115,10 @@ def describe(e: dict) -> str:
         return f'FLASHED for {(e["end_ms"] - e["t_ms"]) / 1000:.1f} s: "{text}"'
     if e["kind"] == "appear" and e.get("end_ms"):
         return f'{lab} for {(e["end_ms"] - e["t_ms"]) / 1000:.1f} s: "{text}"'
+    if e["kind"] == "transient":
+        n = e.get("frames", 1)
+        what = f'"{text}"' if text else f"the area at {e['bbox']}"
+        return f'SHOWN FOR {n} FRAME{"S" if n > 1 else ""} ({e["end_ms"] - e["t_ms"]} ms) between two changes: {what}'
     if e["kind"] == "text_change":
         return f'{lab}: "{e.get("before", "")}" → "{e.get("after", text)}"'
     if e["kind"] == "screen_change":
@@ -167,7 +172,8 @@ def render_md(evidence: dict, title: str) -> str:
         "",
         f"Video `{v['file']}`, {v['width']}×{v['height']}, {v['duration_ms'] / 1000:.1f} s. "
         f"Screen states: {len(evidence['screens'])}, events: {len(evidence['events'])}, utterances: {len(evidence['speech']['utterances'])}.",
-        "Time is from the start of the video. Square brackets hold event ids from evidence.json, then the evidence frame.",
+        "Time is from the start of the video. Square brackets hold event ids from evidence.json, then the evidence frame;"
+        " \"moment\" is a strip of every frame around a short event, cropped to it and enlarged.",
         *(["The video has no audio track: nothing was said, every fact comes from the screen."] if evidence["speech"].get("no_audio") else []),
         *input_line(evidence),
         "",
@@ -197,7 +203,7 @@ def render_md(evidence: dict, title: str) -> str:
         frame = f"  frame {r['frame']}" if r["frame"] else ""
         first = True
         for e in rest:
-            lines.append(f"{ts(r['t']) if first else ' ' * 7}  {describe(e)}  [{e['id']}]{frame if first else ''}")
+            lines.append(f"{ts(r['t']) if first else ' ' * 7}  {describe(e)}  [{e['id']}]{frame if first else ''}" + (f"  moment {e['moment']}" if e.get("moment") else ""))
             first = False
         if gone:
             names = ", ".join(f'"{(e.get("text") or "").strip()}"' for e in gone[:12]) + (f" and {len(gone) - 12} more" if len(gone) > 12 else "")
@@ -274,7 +280,7 @@ def render_html(evidence: dict, title: str, video_src: str) -> str:
             parts.append(f'<div class="ev"><span class="b {cls}">{"FLASHED" if flash else LABEL[e["kind"]]}</span>{esc(describe(e).split(": ", 1)[-1])}<span class="id">{e["id"]}</span></div>')
         if gone:
             parts.append(f'<div class="ev gone"><span class="b disappear">DISAPPEARED</span>{esc(", ".join((e.get("text") or "") for e in gone[:10]))}{" …" if len(gone) > 10 else ""}</div>')
-        imgs = [e["crop"] for e in evs if e.get("crop") and e["kind"] != "disappear"][:6]
+        imgs = ([e["moment"] for e in evs if e.get("moment")] + [e["crop"] for e in evs if e.get("crop") and not e.get("moment") and e["kind"] != "disappear"])[:6]
         crop_html = f'<div class="crops">{"".join(f"<img src=\"{esc(i)}\" loading=lazy>" for i in imgs)}</div>' if imgs else ""
         key = f'<div class="key"><img src="{esc(r["frame"])}" loading=lazy></div>' if r["frame"] and any(e["kind"] == "screen_change" for e in evs) else ""
         feed.append(f'<div class="row" data-t="{r["t"]}"><div class="t">{ts(r["t"])}</div><div>{"".join(parts)}{crop_html}{key}</div></div>')
