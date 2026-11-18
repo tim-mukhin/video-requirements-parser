@@ -12,6 +12,59 @@ The repo has two parts:
 
 An index of all generated videos with links and scores: `out/index.html`.
 
+## Use it on a bug video
+
+```sh
+parse/bin/vrp report path/to/video.mp4 --ticket path/to/ticket.md    # parse/bin/vrp.cmd on Windows
+```
+
+One command runs the whole pipeline and writes `<video>.report.md` next to the video:
+
+1. **Parser** (deterministic, no model): speech, screen states, cursor, clicks, hovers, what appeared, moved,
+   flickered or flashed, cross-checks - `parsed/timeline.md` for models, `parsed/timeline.html` with frames for people.
+2. **Watcher** (a model, frames only, plus the ticket): what looks wrong and when, without the parser's view.
+3. **Investigator** (a model): checks each of the watcher's points against the timeline and the frames, and asks the
+   video itself through the parser on demand:
+
+   ```
+   vrp events --near 12.5 --window 1        what the timeline has around a moment
+   vrp look --from 4.0 --to 4.4 --box x,y,w,h --scale 3   every frame of a span, cropped and enlarged
+   vrp diff --box x,y,w,h --at 4.0 --to 4.4 how an area differs: brightness, drawing kept or new, text before and after
+   vrp ocr --at 4.2 --box x,y,w,h           the text in an area at a moment
+   vrp find --text "Connecting" --from 3 --to 6   every frame searched for a text (finds a one-frame state)
+   ```
+
+   The investigator's shell is limited to `vrp` (`--allow-tool 'shell(vrp:*)'`); everything else is denied.
+
+The models run through GitHub Copilot CLI in headless mode (`copilot` signed in; two premium requests per video with
+Claude Sonnet 5.5). For an agent that then reproduces the bug and comes back to the video when the repro does not
+match, see the skill `skills/video-bug-report/SKILL.md` (Claude Code and Copilot CLI).
+
+### How well it works on real bug videos
+
+55 screen recordings attached to public bug reports (Firefox, LibreOffice, GNOME, KDE, VS Code, Zed, Joplin,
+Rocket.Chat, Home Assistant and others; `out/real/`, not in the repository). For each: the reporter's ticket as filed
+(`ticket.md`), what the frames of the recording show, labelled frame by frame (`visible.json`), and the issue's
+expected report. Two judges of different families (GPT-6 Sol, Claude Sonnet 5.5) score each report 0-2 on repro
+steps, what actually happens with the decisive evidence, the verdict, and what the video added beyond the ticket.
+
+| input of the agent (Claude Sonnet 5.5) | score |
+|---|---|
+| the ticket alone | 38% |
+| ticket + parser timeline | 69% |
+| ticket + frames (watcher) | 77% |
+| ticket + watcher + investigator with `vrp` (`vrp report`) | 83% |
+| the best of the four per recording | 86% |
+
+Without the ticket, from the video alone (judged against what the frames show): parser timeline 41%, frames 42%,
+watcher + investigator with `vrp` 52%. The parser and the frames are strong at different things: the parser at long
+videos and exact moments (a cursor flickering, a focus that does not return, a menu jumping 14 px for one frame), the
+frames at what a picture means (render artefacts, a tooltip in the wrong place). Out of reach: a state shorter than a
+frame of the recording, sound other than speech, keys (inferred, marked as a guess), what is off screen.
+
+`parse/bench.py <report> ... --truth ticket|visible|issue` prints the table by group (cursor or not, length, control
+recordings) for any agent configuration; `judge.py --ticket|--visible` grades a configuration first.
+
 ## Why synthetic videos
 
 To check a parser you need videos where you know exactly what happens: which windows, where each button is, when an
@@ -361,6 +414,16 @@ Known limitations:
   something else, are not resolved by the rules above.
 - **Ground truth of icon buttons** - the generator records the label of an icon button (Attach, Send) as its text,
   though nothing is written on screen; screen text below 100% on such videos is mostly that.
+- **Uneven frame times** - phones and screen recorders write frames unevenly while the average rate looks normal; the
+  frame passes count time as frame number / fps. `steady()` in `run.py` measures the real frame times and, when they
+  drift more than 0.1 s from that grid (31 of 55 real recordings, up to 3.9 s), re-times the video to 30 fps (60 when
+  the source has more than 32 frames a second, so a frame shown for 25 ms is kept) before the frame passes; the speech
+  pass always used the real time.
+- **One-frame states** - the screen states need a stable look, so a status shown for one frame is not a state. The
+  motion pass keeps it as a transient: an area that changes and changes again within two frames gives "SHOWN FOR
+  1 FRAME (17 ms) between two changes: "Connecting"" with a full-size crop and its OCR. Many transients in one place
+  within a second are an animation or a playing video and are left out.
+- **Keys** - no key press is seen; typing is inferred from text growing in a field.
 
 The evaluator (`evaluate.py`) reports: critical moments of the scenario, recall and precision of screen changes,
 clicks (time and place), hovers, screen text (share of on-screen texts read at the right moment, this is where facts
