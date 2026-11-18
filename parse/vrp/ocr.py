@@ -6,6 +6,7 @@ letters only, so an icon is not read as a CJK character; ru: East Slavic, Cyrill
 few pixels around the line; they are shrunk to the ink inside, as tight as Vision's, since later passes compare the
 pixels inside a text's box (a typed field: "diego@fa" keeps its pixels while "b" is added next to it).
 """
+import hashlib
 import os
 import time
 
@@ -15,6 +16,8 @@ from PIL import Image
 ENGINE = SPLIT = None
 VISION_LANGS = {"en": ["en-US"], "ru": ["ru-RU", "en-US"]}
 REC = {"en": "en", "ru": "eslav"}
+THREADS = 0  # ONNX threads per engine, 0 = all; set by the workers of screen.ocr_all
+CACHE = 20000  # remembered line readings
 INK = 48  # grey levels from the box's background that count as text
 spent = 0.0  # seconds inside the engine, for run.json
 
@@ -27,8 +30,39 @@ def _rapid(lang: str):
         from rapidocr.utils.typings import LangRec, ModelType, OCRVersion
 
         # max_side_len: a wide region enlarged for small text is not shrunk back before detection
-        _engines[lang] = RapidOCR(params={"Global.log_level": "error", "Global.max_side_len": 4096, "Rec.ocr_version": OCRVersion.PPOCRV5, "Rec.lang_type": LangRec(REC[lang]), "Rec.model_type": ModelType.MOBILE})
+        r = RapidOCR(params={"Global.log_level": "error", "Global.max_side_len": 4096, "Rec.ocr_version": OCRVersion.PPOCRV5, "Rec.lang_type": LangRec(REC[lang]), "Rec.model_type": ModelType.MOBILE, **({"EngineConfig.onnxruntime.intra_op_num_threads": THREADS} if THREADS else {})})
+        r.recognize_txt = _remembering(r.recognize_txt)
+        _engines[lang] = r
     return _engines[lang]
+
+
+def _remembering(recognize):
+    """Recognition of each cut-out line, remembered by its pixels: between two states of a screen most lines are the
+    same pixels, and reading a line is most of the time of reading a frame (1.1 of 1.3 s on a 1080p screen)."""
+    from rapidocr.ch_ppocr_rec.typings import TextRecOutput
+
+    seen: dict[bytes, tuple] = {}
+
+    def run(imgs):
+        if not imgs:
+            return recognize(imgs)
+        keys = [hashlib.blake2b(np.ascontiguousarray(im).tobytes(), digest_size=16, key=repr(im.shape).encode()).digest() for im in imgs]
+        first: dict[bytes, int] = {}
+        for i, k in enumerate(keys):
+            if k not in seen:
+                first.setdefault(k, i)
+        todo = list(first.values())
+        if todo:
+            res = recognize([imgs[i] for i in todo])
+            for i, t, sc, w in zip(todo, res.txts, res.scores, res.word_results):
+                seen[keys[i]] = (t, sc, w)
+            if len(seen) > CACHE:
+                for k in list(seen)[: len(seen) - CACHE]:
+                    del seen[k]
+        got = [seen[k] for k in keys]
+        return TextRecOutput(imgs=imgs, txts=tuple(g[0] for g in got), scores=[g[1] for g in got], word_results=tuple(g[2] for g in got), elapse=0.0)
+
+    return run
 
 
 def use(name: str) -> None:

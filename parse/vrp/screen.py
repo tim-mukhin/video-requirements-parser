@@ -152,3 +152,32 @@ def _overlap(a: list[float], b: list[float]) -> float:
     ix = max(0, min(a[0] + a[2], b[0] + b[2]) - max(a[0], b[0]))
     iy = max(0, min(a[1] + a[3], b[1] + b[3]) - max(a[1], b[1]))
     return ix * iy / max(1.0, min(a[2] * a[3], b[2] * b[3]))
+
+
+WORKERS = max(1, min(8, (__import__("os").cpu_count() or 2) // 2))  # processes reading key frames at once
+
+
+def _ocr_run(job: tuple) -> tuple[list[list[dict]], float]:
+    paths, lang, region, name, threads = job
+    engine.use(name)
+    engine.THREADS = threads
+    return [ocr(p, lang, region) for p in paths], engine.spent
+
+
+def ocr_all(paths: list[str], lang: str, region: list[int]) -> list[list[dict]]:
+    """ocr() of every key frame, in WORKERS processes; each gets a run of consecutive states, so the lines it has
+    already read (ocr.py remembers them) come back in its next states."""
+    import multiprocessing as mp
+    import os
+    from concurrent.futures import ProcessPoolExecutor
+
+    n = min(WORKERS, len(paths) // 20)
+    if n <= 1:
+        return [ocr(p, lang, region) for p in paths]
+    cut = [round(i * len(paths) / n) for i in range(n + 1)]
+    threads = max(1, (os.cpu_count() or n) // n)
+    jobs = [(paths[a:b], lang, region, engine.ENGINE, threads) for a, b in zip(cut, cut[1:])]
+    with ProcessPoolExecutor(n, mp_context=mp.get_context("spawn")) as ex:
+        done = list(ex.map(_ocr_run, jobs))
+    engine.spent += sum(s for _, s in done)
+    return [t for texts, _ in done for t in texts]

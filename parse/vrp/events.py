@@ -44,13 +44,34 @@ def match_texts(prev: list[dict], cur: list[dict]) -> tuple[list[dict], list[dic
     """One-to-one: every text of the previous state accounts for one text of the current state, the nearest one with
     the same reading (so "private" in the next row does not hide a row that turned "private"). -> (added, removed)"""
     pairs = []
+    if not prev or not cur:
+        return list(cur), list(prev)
+    keys = {}
+
+    def key(t: dict) -> tuple[str, list[str]]:
+        k = keys.get(id(t))
+        if k is None:
+            n = norm(t["text"])
+            k = keys[id(t)] = (n, re.findall(r"\d+", n))
+        return k
+
+    def alike(a: dict, b: dict) -> bool:  # same(), with each text normalised once
+        (na, da), (nb, db) = key(a), key(b)
+        return da == db and fuzz.ratio(na, nb) >= 88
+
+    P = np.array([p["bbox"] for p in prev], dtype=float)
     for i, c in enumerate(cur):
+        cx, cy, cw, ch = c["bbox"]
+        ix = np.clip(np.minimum(P[:, 0] + P[:, 2], cx + cw) - np.maximum(P[:, 0], cx), 0, None)
+        iy = np.clip(np.minimum(P[:, 1] + P[:, 3], cy + ch) - np.maximum(P[:, 1], cy), 0, None)
+        inter = ix * iy
+        over = np.nonzero(inter > 0.3 * (P[:, 2] * P[:, 3] + cw * ch - inter))[0]
         # this place held another text before: the text changed here, a far copy of the new text does not explain it
-        replaced = any(iou(p["bbox"], c["bbox"]) > 0.3 and not same(p["text"], c["text"]) for p in prev)
-        for j, p in enumerate(prev):
-            dx, dy = abs(p["bbox"][0] - c["bbox"][0]), abs(p["bbox"][1] - c["bbox"][1])
-            if dx <= 40 and dy <= 250 and same(p["text"], c["text"]) and not (replaced and dx + dy > 12):
-                pairs.append((dx + dy, i, j))
+        replaced = any(not alike(prev[j], c) for j in over)
+        dx, dy = np.abs(P[:, 0] - cx), np.abs(P[:, 1] - cy)
+        for j in np.nonzero((dx <= 40) & (dy <= 250))[0]:
+            if alike(prev[j], c) and not (replaced and dx[j] + dy[j] > 12):
+                pairs.append((int(dx[j] + dy[j]), i, int(j)))
     used_c, used_p = set(), set()
     for _, i, j in sorted(pairs):
         if i not in used_c and j not in used_p:
@@ -212,6 +233,7 @@ def visual_diff(a: dict, b: dict) -> bool:
 
 
 _small: dict[int, tuple[np.ndarray, np.ndarray, float]] = {}
+_masks: dict = {}
 
 
 def small(image: np.ndarray) -> tuple[np.ndarray, float]:
@@ -228,6 +250,18 @@ def small(image: np.ndarray) -> tuple[np.ndarray, float]:
     return hit[1], hit[2]
 
 
+def colour_mask(sm: np.ndarray, colour: np.ndarray) -> np.ndarray:
+    """1 where every channel is within 4 of the colour; one mask per colour of a frame, a copy for each caller."""
+    key = (id(sm), *colour.tolist())
+    hit = _masks.get(key)
+    if hit is None or hit[0] is not sm:
+        if len(_masks) > 64:
+            _masks.pop(next(iter(_masks)))
+        c = colour.astype(int)
+        hit = _masks[key] = (sm, (cv2.inRange(sm, tuple(int(v) for v in np.clip(c - 4, 0, 255)), tuple(int(v) for v in np.clip(c + 4, 0, 255))) > 0).astype(np.uint8))
+    return hit[1].copy()
+
+
 def fills(image: np.ndarray, box: list[int]) -> list[tuple[list[int], float]]:
     """Same-colour areas around a box, seeded from the pixels just outside each side: (box in full px, share of the
     screen). Thin lines inside are bridged (a progress bar, a divider); the text itself counts as inside."""
@@ -240,7 +274,7 @@ def fills(image: np.ndarray, box: list[int]) -> list[tuple[list[int], float]]:
         px, py = round(px), round(py)
         if not (0 <= px < sw and 0 <= py < sh):
             continue
-        mask = (np.abs(sm.astype(np.int16) - sm[py, px].astype(np.int16)).max(axis=2) <= 4).astype(np.uint8)
+        mask = colour_mask(sm, sm[py, px])
         mask[max(0, round(y)):round(y + h) + 1, max(0, round(x)):round(x + w) + 1] = 1
         mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
         _, labels, st, _ = cv2.connectedComponentsWithStats(mask, connectivity=4)

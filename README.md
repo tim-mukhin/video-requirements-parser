@@ -176,6 +176,12 @@ out/<lang>/<id>/
 Every pass writes its own file, no LLM involved; deterministic code assembles them into one story. A pass is
 recomputed only when the video or the pass version changes.
 
+Speed: about the length of the video on an M4 Max (a 3-minute 1080p Blender session with 481 screen states and
+200+ lines of text on every one: 3.5 minutes; it was 1 h 48 min before). Most of the time is reading text. Each line
+the OCR cuts out is remembered by its pixels, so lines that did not change are not recognised again. Key frames are
+read in several processes, each taking a run of consecutive states. Reading only the changed part of a frame was
+tried and dropped: on a small cut the detector splits lines differently, and half of the new text was lost.
+
 ```
 out/<lang>/<id>/parsed/
   run.json          video hash, pass versions, timings

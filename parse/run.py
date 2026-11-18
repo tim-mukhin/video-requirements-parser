@@ -159,9 +159,10 @@ def run(key: str, variant: str | None, force: set[str], no_speech: bool = False,
         segs, meta, track = screen_pass.scan(steady(video, work), work / "frames")
         region = meta["regions"]["screen"]
         ev_pass.setup(work, meta, track)
+        texts = screen_pass.ocr_all([s["frame"] for s in segs], lang, region)
         raw = [
-            {"id": f"s{i + 1:03d}", "start_ms": s["start_ms"], "end_ms": s["end_ms"], "frame": Path(s["frame"]).relative_to(work).as_posix(), "texts": screen_pass.ocr(s["frame"], lang, region)}
-            for i, s in enumerate(segs)
+            {"id": f"s{i + 1:03d}", "start_ms": s["start_ms"], "end_ms": s["end_ms"], "frame": Path(s["frame"]).relative_to(work).as_posix(), "texts": tx}
+            for i, (s, tx) in enumerate(zip(segs, texts))
         ]
         return {"meta": meta, "raw": len(raw), "screens": ev_pass.merge_same(raw), "cursor": track}
 
