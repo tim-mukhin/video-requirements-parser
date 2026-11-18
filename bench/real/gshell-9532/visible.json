@@ -1,0 +1,15 @@
+{
+ "recording": "recording.mp4",
+ "reviewer": "claude, from frames and the issue text",
+ "control": false,
+ "shows_bug": "partly",
+ "steps": [
+  {"t": "00:00.0", "action": "GNOME overview already open; the user repeatedly enters/leaves the overview and app grid (desktop at 00:00.5-01.0, 02.0-02.2, 04.5-04.8, 06.5-07.2, 08.5-09.0, 15.0-15.5, 20.5-21.5; app grid at 07.8-08.2 and 15.8-16.0)"},
+  {"t": "00:03.0", "action": "overview where the workspaces slide to the normal layout: current workspace centered with neighbours peeking (03.5-04.2, 13.0-14.8)"},
+  {"t": "00:09.2", "action": "enters the overview again: it settles in the off-center state (09.5-12.2), then later again at 17.8-20.2"}
+ ],
+ "actual": "Several times the overview comes to rest between two workspaces instead of centering one: at 00:00.0, 01.5-02.8, 09.5-12.2 and 17.8-20.2 workspace 1 is cut by the left screen edge and workspace 2 by the right edge, with a large gap in the middle, and the workspace indicator under the search box highlights the boundary between the first two thumbnails. In other entries (03.5-04.2, 13.0-14.8) the overview shows the normal centered layout with the indicator on the first thumbnail. The sequence of overview/desktop/app-grid transitions is erratic.",
+ "decisive": "00:10.5: overview at rest with workspace 1 and workspace 2 both cut by the screen edges and the indicator straddling the first two thumbnails, versus 00:13.0 with workspace 1 centered",
+ "not_visible": ["the Super key press (no keystroke overlay)", "the touchpad gesture itself (no touch/gesture indicator)", "which input caused each transition"],
+ "notes": "All workspaces show only the same wallpaper, so the off-center state is judged from geometry and the top indicator. No input visualisation, so the cause (Super during gesture) cannot be tied to frames; only the stuck intermediate result is visible."
+}

@@ -1,0 +1,15 @@
+{
+ "recording": "recording-3.mp4",
+ "reviewer": "claude, from frames and the issue text",
+ "control": false,
+ "shows_bug": "yes",
+ "steps": [
+  {"t": "00:00.0", "action": "excalidraw.com in an Android Chromium browser (portrait phone), a selected rectangle near the bottom-left of the canvas"},
+  {"t": "00:02.2", "action": "long-presses the rectangle: full context menu (Cut ... Delete) opens fully on screen; closes at 03.8"},
+  {"t": "00:04.4", "action": "long-presses again; repeats the long-press about 10 times in total (04.4, 06.2, 07.8, 09.2, 11.2, 13.0, 15.2, 17.2, 18.8, ...)"}
+ ],
+ "actual": "Of about 10 long-presses only 3 (02.2, 09.2, 13.0) give a fully visible menu. The others place the menu at the very bottom of the screen where it runs off the edge, only 'Cut / Copy / Paste' and part of 'Copy to clipboard as PNG' visible (04.5-05.5, 06.2-07.0, 07.8-08.5, 11.2-12.2, 15.2-16.5, 17.2-18.0, 18.8-19.8). At full frame rate, at about 00:04.4 the full menu appears in the upper position for one frame and then jumps down to the cut-off bottom position.",
+ "decisive": "~00:04.4: the full context menu is shown for a single frame, next frame it has jumped to the bottom edge and is cut off (only Cut/Copy/Paste visible)",
+ "not_visible": ["device (Redmi Note 8 Pro) and browser name (Chrome) are not shown, only a Chromium-like address bar", "the '3/10 correct' count is not stated on screen, only countable", "unreliable scrolling of the menu (no scroll attempt seen)", "touch points (no touch indicator)"],
+ "notes": "480x800, ~24 fps; the jump lasts one frame and is only visible at full frame rate, 4 fps sampling shows each press as either 'full' or 'cut off'. Long-press moments inferred from menu appearance, no touch indicator. Press count after 18.8 runs past the end of the clip."
+}

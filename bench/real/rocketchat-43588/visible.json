@@ -1,0 +1,22 @@
+{
+  "recording": "recording.mp4",
+  "reviewer": "claude, from frames and the issue text",
+  "control": false,
+  "shows_bug": "yes",
+  "steps": [
+    {"t": "00:01.0", "action": "Chrome on macOS, local Rocket.Chat (localhost:3000/channel/general); the reporter's webcam is overlaid bottom right"},
+    {"t": "00:05.0", "action": "opens Chrome DevTools in responsive mode with the Console tab, clears it"},
+    {"t": "00:13.0", "action": "opens the video message recorder in #general (camera preview, 00:00, Cancel / Send) and starts recording (timer 00:07 at 00:21.0)"},
+    {"t": "00:16.2", "action": "briefly shows VS Code with a diff of VideoMessageRecorder.tsx that adds console.log('[video-recorder] ...') calls (00:16.2-00:20)"},
+    {"t": "00:26.8", "action": "without pressing Cancel or Send, opens the room list and switches to the room 'test' (localhost:3000/group/test, 00:29.0)"},
+    {"t": "00:39.5", "action": "shows the VS Code diff again (00:39.5-00:47), then returns to the browser console until the end (00:51)"}
+  ],
+  "actual": "While recording in #general the console logs '[video-recorder] timer started 795' and '[video-recorder] tick 00:01 interval 795', 'tick 00:02' ... every second. After switching to the 'test' room the recorder is no longer on screen, the console prints '[video-recorder] unmounted while timer still running 795' (VideoMessageRecorder.tsx:121) right after 'tick 00:15', and the ticks keep coming with the same interval id: 'tick 00:16' ... 'tick 00:35' at 00:49.0 and 'tick 00:37' at 00:51.0.",
+  "decisive": "00:29.0-00:51.0: in room 'test' with no recorder visible, the console shows 'unmounted while timer still running 795' followed by continuing '[video-recorder] tick 00:16 ... 00:37 interval 795' lines",
+  "not_visible": [
+    "other users seeing the user as 'recording' - no second client is shown",
+    "the narration (English speech by the reporter is present per the issue, not transcribed here)",
+    "the exact moment Record is pressed (timer reads 00:07 at 00:21.0, so recording started around 00:14)"
+  ],
+  "notes": "1920x1080, 51 s. The console text is small and partly covered by the webcam picture-in-picture. The logs come from console.log calls the reporter added himself (shown in VS Code), so the evidence is instrumented output, not stock UI."
+}

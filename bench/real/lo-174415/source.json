@@ -1,0 +1,23 @@
+{
+  "id": "lo-174415",
+  "url": "https://bugs.documentfoundation.org/show_bug.cgi?id=174415",
+  "kind": "bugzilla",
+  "licence": "public bug tracker attachment (no explicit licence); private testing only",
+  "long": false,
+  "platform": "desktop (LibreOffice Calc 26.8)",
+  "files": [
+    {
+      "file": "recording.mp4",
+      "source": "https://bugs.documentfoundation.org/attachment.cgi?id=209627",
+      "origin": "attachment 209627 'data-field-bug.mp4' by <email>",
+      "duration_s": 61.5,
+      "resolution": "1920x1080",
+      "has_audio_track": true,
+      "speech": "none (silent audio track)"
+    }
+  ],
+  "bug_in": "the only recording",
+  "description": "In the Pivot Table Layout dialog the auto-generated Data field cannot be dragged from Column Fields to Row Fields.",
+  "expected_report": "With Sales and Cost as data fields, the user opens Pivot Table Layout and drags the 'Data' field from Column Fields to Row Fields: nothing happens, no message. Expected: the field moves so data values are shown vertically. Workaround: Ctrl-drag on the sheet.",
+  "difficulty": "Drag in a dense dialog with small labels; the bug is the absence of a change."
+}

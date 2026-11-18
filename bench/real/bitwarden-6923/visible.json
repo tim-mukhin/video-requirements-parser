@@ -1,0 +1,17 @@
+{
+ "recording": "recording.mp4",
+ "reviewer": "claude, from frames and the issue text",
+ "control": false,
+ "shows_bug": "yes",
+ "steps": [
+  {"t": "00:00.0", "action": "QuickTime Player is the active app (menu bar), Mac App Store Bitwarden page in the background"},
+  {"t": "00:00.2", "action": "clicks the Bitwarden menu bar icon: the Bitwarden settings window opens, menu bar switches to 'Bitwarden'"},
+  {"t": "00:03.8", "action": "window closes, menu bar returns to 'QuickTime Player' (00:04.0)"},
+  {"t": "00:04.2", "action": "window reopens; closes again at 00:06.2, menu bar 'QuickTime Player' at 00:06.5"},
+  {"t": "00:07.0", "action": "keeps clicking the menu bar icon (cursor on the icon from 00:06.8); window toggles open/closed at 08.0, 08.5, 09.0, 09.8, 10.8, 11.5, 12.2, 14.5, 16.5"}
+ ],
+ "actual": "The first two closes (03.8, 06.2) return focus to QuickTime Player. From 00:08.0 on, every time the window disappears the menu bar still shows 'Bitwarden File Edit View Account Window Help' (08.0-08.2, 09.0-09.5, 10.8-11.2, 12.2-14.2): window closed, focus stays on Bitwarden. Only the last close at 00:16.5 shows 'QuickTime Player' again. A case where a click leaves the window open is not identifiable, because individual clicks are not visible.",
+ "decisive": "00:12.2-00:14.2: Bitwarden window is gone, App Store page visible, but the menu bar app name is still 'Bitwarden' instead of 'QuickTime Player'",
+ "not_visible": ["the moment and speed of each click (no click indicator; icon highlight only in a few sampled frames)", "whether a second quick click failed to close the window", "the 'run in menu bar only' setting is visible as checked boxes but not toggled in the video"],
+ "notes": "Small 1280x800 capture, menu bar text tiny; focus judged from the app name at the left of the menu bar. Window toggles fast, sub-second states may be missed at 4 fps sampling."
+}

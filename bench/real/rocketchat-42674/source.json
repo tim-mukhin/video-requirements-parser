@@ -1,0 +1,23 @@
+{
+  "id": "rocketchat-42674",
+  "url": "https://github.com/RocketChat/Rocket.Chat/issues/42674",
+  "kind": "github",
+  "licence": "GitHub issue attachment (user content, no explicit licence); private testing only",
+  "long": false,
+  "platform": "web (open.rocket.chat in Brave on Windows 11)",
+  "files": [
+    {
+      "file": "recording.mp4",
+      "source": "https://github.com/user-attachments/assets/3911122a-2ea8-4cf4-8fdb-fbfdc6d39b41",
+      "origin": "issue body by AnsariTazeem",
+      "duration_s": 45.7,
+      "resolution": "1916x1140",
+      "has_audio_track": true,
+      "speech": "none (silent audio track)"
+    }
+  ],
+  "bug_in": "the only recording",
+  "description": "Some emoji-name tooltips appear at the top-left of the page after the user clicked another application and returned the pointer without clicking.",
+  "expected_report": "With the composer emoji picker open, tooltips appear next to hovered emojis. The user clicks another app (Notepad), moves the pointer back over the picker without clicking Rocket.Chat and hovers emojis: for some emojis the white name tooltip appears at the page's top-left corner. Expected: tooltip next to the hovered emoji.",
+  "difficulty": "Tooltip far from the cursor, the precondition is focus in another app, some emojis are fine (inconsistent), hover only."
+}

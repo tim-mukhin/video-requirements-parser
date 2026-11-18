@@ -1,0 +1,17 @@
+{
+  "id": "rocketchat-43588",
+  "url": "https://github.com/RocketChat/Rocket.Chat/issues/43588",
+  "media_url": "https://github.com/user-attachments/assets/c40558c4-d1e2-47bd-99d5-27a8e5717515",
+  "files": [
+    "recording.mp4"
+  ],
+  "licence": "GitHub issue attachment: user-uploaded content under GitHub Terms of Service; the project code licence does not automatically cover it. Public; fine for private internal testing, do not redistribute.",
+  "platform": "web (Chrome on macOS, local Rocket.Chat dev build)",
+  "duration_s": 51.8,
+  "resolution": "1920x1080 60fps",
+  "speech": "English narration by the reporter, plus a webcam picture-in-picture",
+  "description": "Video message recorder keeps its timer and 'recording' status running after the user leaves the room.",
+  "expected_report": "In a channel the user starts a video message, allows the camera and presses Record; the timer in the recorder starts counting. Without pressing Cancel or Send the user switches to another room. Expected: the recorder closes, the timer stops and the 'recording' status clears. Actual: in the DevTools console the [video-recorder] tick log keeps printing every second after leaving the room (and an 'unmounted while timer still running' line appears), so the timer leaks and other users keep seeing the user as recording until reload.",
+  "difficulty": "Tiny DevTools console text, dark theme, many browser tabs and bookmarks, webcam overlay covering part of the console, the evidence is a scrolling log rather than a UI change.",
+  "long": false
+}

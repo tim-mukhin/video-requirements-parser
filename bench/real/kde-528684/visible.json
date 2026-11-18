@@ -1,0 +1,26 @@
+{
+  "recording": "recording.mp4",
+  "reviewer": "claude, from frames and the issue text",
+  "control": false,
+  "shows_bug": "yes",
+  "steps": [
+    {"t": "00:00.0", "action": "text card: 'If I have an app pinned, and move it with a keyboard shortcut - it will disappear.'"},
+    {"t": "00:03.5", "action": "KDE desktop with a vertical icons-only task manager on the left; pinned icons include a terminal ('>') as the 6th icon"},
+    {"t": "00:04.0", "action": "clicks the pinned terminal icon; a terminal window opens and its icon is highlighted (00:04.2-00:05.2)"},
+    {"t": "00:05.5", "action": "the terminal window vanishes from the desktop (moved to another virtual desktop; the shortcut itself is not visible)"},
+    {"t": "00:07.2", "action": "switches to the other virtual desktop (slide animation) where the terminal is, then back (00:08.2) and again (00:09.8)"},
+    {"t": "00:11.5", "action": "the terminal is moved away again"},
+    {"t": "00:12.0", "action": "an overview/desktop grid appears briefly (00:12.0-00:12.8)"},
+    {"t": "00:15.2", "action": "text card: 'sometimes, it happens with other apps which are minimized to tray.'"},
+    {"t": "00:19.2", "action": "second clip with a chat app (blue speech-bubble icon, Keybinds settings window open) moved between desktops"}
+  ],
+  "actual": "After the terminal window is moved away at 00:05.5, the pinned '>' icon disappears from the task manager and the icons below shift up (00:05.5-00:07.0); it comes back when the user switches desktops (00:07.2). On the second desktop switch the icon stays as an inactive launcher (00:08.5-00:09.5), which is the expected look. After the second move at 00:11.5 the icon is gone again (00:11.5-00:11.8) and returns with the overview at 00:12.0. In the second clip the chat app's icon disappears the same way at 00:21.0-00:21.8 and 00:29.2-00:29.5.",
+  "decisive": "00:05.2 -> 00:05.5: the terminal window leaves the screen and its pinned '>' icon vanishes from the vertical task manager instead of staying as a launcher",
+  "not_visible": [
+    "the keyboard shortcut used to move the window (only its effect is visible)",
+    "that there are exactly two virtual desktops, and which desktop is current - no pager is shown",
+    "that the chat app in the second clip is minimized to tray (only stated by the text card)",
+    "Plasma version, Wayland"
+  ],
+  "notes": "The evidence is a 30-px-wide vertical panel at 1920x1080; I checked it on full-resolution crops. Text cards at 00:00.0-00:03.5 and 00:15.2-00:19.2. Busy fractal wallpaper. The second clip's chat icon is not clearly pinned; it may be an ordinary running task."
+}

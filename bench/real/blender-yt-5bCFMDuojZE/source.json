@@ -1,0 +1,24 @@
+{
+  "id": "blender-yt-5bCFMDuojZE",
+  "url": "https://www.youtube.com/watch?v=5bCFMDuojZE",
+  "kind": "youtube",
+  "licence": "YouTube; private testing only",
+  "long": false,
+  "platform": "desktop (Blender, Geometry Nodes editor)",
+  "files": [
+    {
+      "file": "recording.mp4",
+      "source": "https://www.youtube.com/watch?v=5bCFMDuojZE",
+      "origin": "YouTube",
+      "duration_s": 236.9,
+      "resolution": "1920x1080",
+      "has_audio_track": true,
+      "ext": "mp4",
+      "speech": "speech (en), checked on a 2-min sample from 0 s"
+    }
+  ],
+  "bug_in": "the only recording",
+  "description": "Geometry Nodes editor becomes extremely laggy selecting and dragging nodes in a huge node tree (48,000 nodes, most disconnected).",
+  "expected_report": "With a node tree exaggerated to 48,000 nodes (only ~1,000 connected to output), selecting or dragging any node takes seconds to respond, even for disconnected nodes. Expected: editor interaction cost should not depend on unconnected nodes; dragging should stay responsive.",
+  "difficulty": "Dark UI, dense node graph with unreadable labels, the bug is latency between mouse action and response."
+}

@@ -1,0 +1,19 @@
+{
+  "recording": "recording.mp4",
+  "reviewer": "claude, from frames and the issue text",
+  "control": false,
+  "shows_bug": "yes",
+  "steps": [
+    {"t": "00:00.0", "action": "Treeherder Failure Summary tab: row 'AssertionError: in-tree files should pass the linter' with a grey button on the left and two grey icon buttons on the right; a sub-row 'i2009222 Perma [tier 2] clang-tidy ...' with a grey pin button"},
+    {"t": "00:01.0", "action": "hovers the grey button at the left of the error row"},
+    {"t": "00:02.8", "action": "hovers the grey pin button of the sub-row"},
+    {"t": "00:04.5", "action": "hovers the rightmost grey (bug) button of the error row"}
+  ],
+  "actual": "Each grey button loses its icon while the cursor is on it: the left button of the error row is an empty white square at 00:01.2-00:02.0 (tooltip 'File an internal issue for this failure' at 00:01.8); the pin button of the sub-row is empty at 00:02.8-00:03.5; the rightmost bug button is empty at 00:04.8-00:06.2 (tooltip starting 'File a...' at 00:05.2). When the cursor leaves, the icons are visible again (00:02.2, 00:03.8, 00:06.8).",
+  "decisive": "00:04.2 vs 00:04.8: the rightmost grey button shows its bug icon, then with the cursor on it the button is an empty white square",
+  "not_visible": [
+    "how the failed task was opened (the clip starts on the Failure Summary)",
+    "browser and theme"
+  ],
+  "notes": "510x220 crop, 8 s; the icon change is small but clear at 4 fps. Exact names of the left button and the pin button are inferred from the tooltip and shape."
+}

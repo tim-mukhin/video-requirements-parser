@@ -1,0 +1,23 @@
+{
+  "id": "mattermost-37659",
+  "url": "https://github.com/mattermost/mattermost/issues/37659",
+  "kind": "github",
+  "licence": "GitHub issue attachment (user content, no explicit licence); private testing only",
+  "long": false,
+  "platform": "desktop/web (Mattermost Desktop 6.2.2 on Windows 10)",
+  "files": [
+    {
+      "file": "recording.mp4",
+      "source": "https://github.com/user-attachments/assets/73eb7bf9-eacb-4ad3-a938-78724a937a29",
+      "origin": "issue body by MohammadHadi2031",
+      "duration_s": 31.0,
+      "resolution": "1280x720",
+      "has_audio_track": true,
+      "speech": "none (silent audio track)"
+    }
+  ],
+  "bug_in": "the only recording",
+  "description": "Scrolling up through a long channel history sometimes jumps backward and skips messages.",
+  "expected_report": "Scrolling upward in a channel with long history loads older messages, but intermittently the list jumps to an earlier point so several messages are never shown. Expected: continuous chronological loading without gaps.",
+  "difficulty": "The evidence is message timestamps/content jumping during fast scroll; intermittent."
+}

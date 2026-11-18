@@ -1,0 +1,23 @@
+{
+  "id": "commons-wikidata-coord-zoom",
+  "url": "https://commons.wikimedia.org/wiki/File:Wikidata_coordinate_picker_zoom_click_bug.webm",
+  "kind": "commons",
+  "licence": "CC0",
+  "long": false,
+  "platform": "web (wikidata.org coordinate input with map picker)",
+  "files": [
+    {
+      "file": "recording.webm",
+      "source": "https://upload.wikimedia.org/wikipedia/commons/2/21/Wikidata_coordinate_picker_zoom_click_bug.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "origin": "Wikimedia Commons file",
+      "duration_s": 14.2,
+      "resolution": "1280x720",
+      "has_audio_track": true,
+      "speech": "none (silent audio track)"
+    }
+  ],
+  "bug_in": "the only recording",
+  "description": "Clicking the zoom button in the Wikidata coordinate picker map does not behave as expected (the description gives no more detail).",
+  "expected_report": "While editing a coordinate statement on Wikidata, the map picker opens; clicking its zoom control closes the picker/editing popup instead of zooming the map (as far as the frames show). Expected: the map zooms and the picker stays open. Verify against the video; the source text only says 'bug with the user interaction on the zoom button'.",
+  "difficulty": "Tiny map popup in a light, dense Wikidata page; 14 s; the source has no written expected/actual."
+}

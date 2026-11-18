@@ -1,0 +1,18 @@
+{
+ "recording": "recording.mp4",
+ "reviewer": "claude, from frames and the issue text",
+ "control": false,
+ "shows_bug": "yes",
+ "steps": [
+  {"t": "00:01.5", "action": "on en.wikipedia.org 'Quadrature amplitude modulation' right-clicks the page; context menu with a Mini Window entry"},
+  {"t": "00:02.8", "action": "picks the mini-window option: overlay 'Select part of the page to keep visible' and a chooser 'Choose what to move to a Mini Window' (selected area / full tab)"},
+  {"t": "00:04.2", "action": "drags a region around the second paragraph ('The two carrier waves...') plus part of the infobox, 948x156; clicks 'Move to Mini Window'"},
+  {"t": "00:05.8", "action": "page returns to normal, then switches to a New Tab where the mini window sits at the bottom (06.2-10.0)"},
+  {"t": "00:10.5", "action": "repeats on monkeytype.com: right-click (11.8), mini-window option (12.8), selects the three lines of typing words, 1280x158 (14.5-16.8), clicks 'Move to Mini Window' (17.2)"},
+  {"t": "00:18.0", "action": "New Tab with the monkeytype mini window at the bottom until the end (22.8)"}
+ ],
+ "actual": "Wikipedia: the mini window (06.2-10.0) shows the top of the page (Wikipedia logo, Search box, start of the title 'Quadrature amplitude modulation'), not the selected paragraph. Monkeytype: the mini window is dark/empty at 18.0-21.0, briefly shows the selected word lines at 21.2-21.8, and when hovered (22.0-22.8) shows the monkeytype header from the top of the page. An overlaid caption added by the author reads 'doesnt show cropped selection. shows other part of webpage'.",
+ "decisive": "00:06.5-00:10.0: mini window shows the Wikipedia header and page title, while the selection made at 00:04.5 was the 'The two carrier waves...' paragraph in the middle of the page",
+ "not_visible": ["Firefox version / Nightly channel", "OS (taskbar suggests Windows, not stated)"],
+ "notes": "Edited video: a text caption is burned in from 00:06.2, and there are cuts between the page and the New Tab view (05.8-06.2, 10.2 black frame, 17.8). The monkeytype mini window content changes over time (empty, selected lines, page top), so the second attempt is less clear-cut than the first."
+}

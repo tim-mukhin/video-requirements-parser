@@ -1,0 +1,17 @@
+{
+ "recording": "recording-1.webm",
+ "reviewer": "claude, from frames and the issue text",
+ "control": false,
+ "shows_bug": "yes",
+ "steps": [
+  {"t": "00:01.6", "action": "opens the Activities overview on an empty desktop and starts typing in the search field"},
+  {"t": "00:01.7", "action": "types 'c' ('Searching...' shown), then 'cal' by 00:02.0"},
+  {"t": "00:02.2", "action": "presses Enter while Calculator is the highlighted first result"},
+  {"t": "00:04.2", "action": "the opened window is closed"},
+  {"t": "00:04.9", "action": "second attempt: opens the overview, types 'cal' again and presses Enter with Calculator highlighted (00:05.3-00:05.4)"}
+ ],
+ "actual": "First attempt: at 00:02.00-00:02.07 the results for 'cal' still show Celluloid first and highlighted; at 00:02.13-00:02.27 the list updates to Calculator, Calendar, Planner with Calculator highlighted; the overview closes at 00:02.33 and a window titled 'Celluloid' (black video player) opens at 00:02.5-00:04.1. Second attempt: overview closes at 00:05.5 with Calculator highlighted and no window appears through the end (00:10.0).",
+ "decisive": "00:02.27 Calculator is the highlighted result, then at 00:03.0 the window that opened is titled 'Celluloid'",
+ "not_visible": ["key presses themselves (Enter inferred from the overview closing)", "typing speed", "what, if anything, the second attempt launched"],
+ "notes": "4K capture, very small UI at contact-sheet scale; needed 15 fps crops. The first attempt is the clear repro; the second attempt ends on an empty desktop."
+}

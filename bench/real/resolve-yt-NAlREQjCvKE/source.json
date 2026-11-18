@@ -1,0 +1,17 @@
+{
+  "id": "resolve-yt-NAlREQjCvKE",
+  "url": "https://www.youtube.com/watch?v=NAlREQjCvKE",
+  "media_url": "https://www.youtube.com/watch?v=NAlREQjCvKE",
+  "files": [
+    "recording.mp4"
+  ],
+  "licence": "YouTube video published under Creative Commons Attribution (CC BY); credit 'Andreas Myself' on YouTube.",
+  "platform": "desktop (DaVinci Resolve Studio 19.1 build 12, Windows, Fusion page)",
+  "duration_s": 96.4,
+  "resolution": "1920x1080 24fps",
+  "speech": "English narration (non-native speaker)",
+  "description": "In a Fusion 3D scene, an image whose alpha comes from a Chroma Keyer hides the inner sphere, while a PNG with a real alpha channel shows it.",
+  "expected_report": "Scene: a blue inner sphere inside a slightly larger outer sphere textured with a world map. With a PNG that already has alpha, the inner sphere is visible through the transparent parts. When the original image without alpha is keyed with a Chroma Keyer and connected to the outer sphere, the inner sphere disappears even though the keyed areas should be transparent. Expected: keyed transparency behaves like PNG alpha. Moving the inner sphere outside makes it visible again.",
+  "difficulty": "Dark Resolve UI with tiny node-editor and inspector text, the change is in a 3D viewer, actions are node rewiring in the node graph.",
+  "long": false
+}

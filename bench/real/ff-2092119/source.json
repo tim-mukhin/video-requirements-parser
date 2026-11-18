@@ -1,0 +1,23 @@
+{
+  "id": "ff-2092119",
+  "url": "https://bugzilla.mozilla.org/show_bug.cgi?id=2092119",
+  "kind": "bugzilla",
+  "licence": "public bug tracker attachment (no explicit licence); private testing only",
+  "long": false,
+  "platform": "desktop (Firefox 160 on Windows)",
+  "files": [
+    {
+      "file": "recording.mp4",
+      "source": "https://bugzilla.mozilla.org/attachment.cgi?id=9681800",
+      "origin": "attachment 9681800 'Firefox bug.mp4' by <email>",
+      "duration_s": 22.9,
+      "resolution": "1920x1080",
+      "has_audio_track": true,
+      "speech": "none (silent audio track)"
+    }
+  ],
+  "bug_in": "the only recording",
+  "description": "Mini-window crop mode sends the whole page to the mini-window instead of the selected region.",
+  "expected_report": "From the context menu the user picks the mini-window option, crops a region (e.g. on monkeytype.com) and sends it: the mini-window contains the whole scrollable page instead of only the selected region. Expected: only the cropped region.",
+  "difficulty": "Context menu, a crop selection rectangle, a new small window."
+}

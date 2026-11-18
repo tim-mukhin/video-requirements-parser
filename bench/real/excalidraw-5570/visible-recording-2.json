@@ -1,0 +1,19 @@
+{
+  "recording": "recording-2.mp4",
+  "reviewer": "claude, from frames and the issue text",
+  "control": false,
+  "shows_bug": "yes",
+  "steps": [
+    {"t": "00:00.0", "action": "excalidraw.com in Brave on Android; a selected rectangle sits near the bottom of the canvas, just above the bottom toolbar"},
+    {"t": "00:02.0", "action": "long-presses the rectangle; a context menu opens (repeated about ten times through 00:16.8, no touch indicator is shown)"}
+  ],
+  "actual": "On almost every long press the context menu opens downward from the rectangle and is cut off by the bottom of the viewport: only Cut / Copy / Paste and sometimes the top of 'Copy to clipboard as PNG' are visible, overlapping the bottom toolbar (00:02.0, 00:04.0, 00:05.0, 00:08.0, 00:09.2, 00:12.0, 00:13.2, 00:14.2, 00:15.5-00:16.8). Its horizontal position shifts a little between presses. Twice the full menu (Cut ... Delete) is shown above the rectangle for a single frame (00:07.8, 00:11.8) and in the next frame it is back in the clipped bottom position (00:08.0, 00:12.0). The menu never stays in the full, readable position.",
+  "decisive": "00:07.8 -> 00:08.0: full context menu shown above the rectangle, then one frame later only Cut/Copy/Paste remain, clipped at the bottom of the screen",
+  "not_visible": [
+    "the device and browser names (Redmi Note 8 Pro, Brave) - only the Brave icon in the address bar hints at the browser",
+    "the 0/10 success count from the issue",
+    "the finger: touches are not shown, long presses are inferred from the menu appearing",
+    "scrolling of the menu"
+  ],
+  "notes": "480x800, 16 s, 4 fps sampling; the full-menu state lasts at most one sampled frame, so its exact duration is unknown."
+}

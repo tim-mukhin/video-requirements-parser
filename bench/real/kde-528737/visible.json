@@ -1,0 +1,19 @@
+{
+ "recording": "recording.mp4",
+ "reviewer": "claude, from frames and the issue text",
+ "control": false,
+ "shows_bug": "yes",
+ "steps": [
+  {"t": "00:01.5", "action": "Dolphin in Columns view: clicks 'tmp' in the root column"},
+  {"t": "00:03.2", "action": "clicks folder 'bug report': next column shows 'sub folder' and a file with a very long name 'Lorem Ipsum is simply dummy text of the printing and typesetting industry...'"},
+  {"t": "00:06.5", "action": "clicks 'sub folder' in that column"},
+  {"t": "00:07.0", "action": "the column with 'sub folder' and the long file name now fills the whole view width; the new column with sub folder's contents is off-screen"},
+  {"t": "00:07.8", "action": "scrolls horizontally (scrollbar at bottom): the 'compact / detials / icons' column comes into view at the right (08.2-09.2)"},
+  {"t": "00:09.5", "action": "clicks in that column: view jumps so that only the 'compact / detials / icons' column is visible at the left, rest empty (09.5-15.3); clicks 'compact', 'detials', 'icons' (10-15): only selection and status bar change"},
+  {"t": "00:15.5", "action": "resizes the window (right edge moves in): layout reflows to show all columns (root, tmp, bug report, sub folder) with the long name truncated '...printing and t...rarian at St Bride...'"}
+ ],
+ "actual": "After opening 'sub folder' (06.5) the column holding the ~200-character file name expands to the full window width (07.0), pushing the next column out of view; the user has to scroll horizontally to see it (08.2). Clicking further folders leaves the view scrolled to a single narrow column with empty space (09.5-15.3) instead of the normal multi-column layout. Only after a window resize at 15.5 does Dolphin show all columns with the long name truncated.",
+ "decisive": "00:07.0: the 'sub folder' column with the long file name spans the whole view, the contents column of 'sub folder' is not visible; versus 00:16.5 after resize, all four columns visible with the name truncated",
+ "not_visible": ["exact length of the file name (~200 chars) beyond what is on screen", "Dolphin / KDE version"],
+ "notes": "1920x1080 at 60 fps, text small; read from full-res crops. The resize at 15.5 is inferred from the window edge moving, the drag itself is barely visible. Folder 'detials' is spelled so on screen."
+}

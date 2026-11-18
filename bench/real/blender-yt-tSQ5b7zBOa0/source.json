@@ -1,0 +1,24 @@
+{
+  "id": "blender-yt-tSQ5b7zBOa0",
+  "url": "https://www.youtube.com/watch?v=tSQ5b7zBOa0",
+  "kind": "youtube",
+  "licence": "YouTube; private testing only",
+  "long": false,
+  "platform": "desktop (Blender, Geometry Nodes, Extrude Mesh)",
+  "files": [
+    {
+      "file": "recording.mp4",
+      "source": "https://www.youtube.com/watch?v=tSQ5b7zBOa0",
+      "origin": "YouTube",
+      "duration_s": 186.9,
+      "resolution": "1920x1080",
+      "has_audio_track": true,
+      "ext": "mp4",
+      "speech": "speech (en), checked on a 2-min sample from 0 s"
+    }
+  ],
+  "bug_in": "the only recording",
+  "description": "Extrude Mesh with 'Individual' changes face index ordering unexpectedly compared with Individual off.",
+  "expected_report": "A curve circle (resolution 8) converted to a mesh gives a cylinder; extruding faces with Extrude Mesh and toggling Individual changes the order of face indices (seen in the spreadsheet/viewport index overlay), which the author considers unexpected. Expected: consistent index ordering with Individual on and off.",
+  "difficulty": "Index numbers in the viewport and spreadsheet are tiny, dark UI, the bug is about data ordering."
+}

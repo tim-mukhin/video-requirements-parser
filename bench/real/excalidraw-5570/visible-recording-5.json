@@ -1,0 +1,18 @@
+{
+  "recording": "recording-5.mp4",
+  "reviewer": "claude, from frames and the issue text",
+  "control": false,
+  "shows_bug": "yes",
+  "steps": [
+    {"t": "00:00.0", "action": "excalidraw.com in Chrome on Android; a three-point arrow near the bottom of the canvas is in point-editing mode"},
+    {"t": "00:00.8", "action": "long-presses a point of the arrow; a context menu opens; repeated on different points through 00:11.8"}
+  ],
+  "actual": "The context menu for the same arrow opens in different places on successive long presses: full menu (Cut ... Delete) above the point at 00:00.8-00:01.5 (with 'Flip vertical' highlighted), 00:05.5 and 00:08.8-00:09.2; opened downward and cut off by the bottom of the screen, showing only Cut/Copy/Paste and the clipboard items, at 00:03.2-00:03.8, 00:05.8-00:06.2 and 00:11.2-00:11.8. At 00:05.5 -> 00:05.8 the full menu is replaced by the clipped one in the next frame.",
+  "decisive": "00:05.5 -> 00:05.8: full context menu above the point jumps to a clipped Cut/Copy/Paste menu at the bottom edge",
+  "not_visible": [
+    "device and browser (Pixel 6 Pro, Chrome) - not shown on screen",
+    "the finger: touches are not shown, presses are inferred from menu and point highlights",
+    "scrolling of the menu"
+  ],
+  "notes": "12 s, sampled at 4 fps; at 00:05.5-00:05.8 it is unclear whether this is one press with a repositioned menu or two presses. A highlighted 'Flip vertical' item at 00:00.8-00:01.5 may be where the finger was lifted; nothing is flipped visibly."
+}

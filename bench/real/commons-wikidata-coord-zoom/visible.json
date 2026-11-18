@@ -1,0 +1,21 @@
+{
+  "recording": "recording.webm",
+  "reviewer": "claude, from frames and the issue text",
+  "control": false,
+  "shows_bug": "yes",
+  "steps": [
+    {"t": "00:00.0", "action": "Wikidata item page, 'coordinate location' statement 46°4'0.91\"N, 11°7'20.78\"E with a small Trento map, in view mode"},
+    {"t": "00:01.2", "action": "clicks 'edit' on the statement; the value field opens and a popup 'will be displayed as:' with a map appears under it"},
+    {"t": "00:04.2", "action": "clicks the '+' (zoom in) button in the popup map; a tooltip appears on it"},
+    {"t": "00:06.8", "action": "clicks 'cancel', the statement returns to view mode (00:07.0)"},
+    {"t": "00:07.5", "action": "clicks 'edit' again; the popup with the map opens again (00:08.2)"},
+    {"t": "00:10.2", "action": "clicks the '-' (zoom out) button in the popup map"}
+  ],
+  "actual": "Each click on a zoom button closes the map popup instead of zooming: after '+' at 00:04.2 the popup fades at 00:04.5 and is gone at 00:04.8; after '-' at 00:10.2 it is gone at 00:10.5. The map scale never changes. The statement stays in edit mode (value field, publish/remove/cancel) after the popup closes.",
+  "decisive": "00:04.2 -> 00:04.8: the cursor presses the map '+' button and the whole 'will be displayed as' popup with the map disappears, map not zoomed",
+  "not_visible": [
+    "what the author expected - the source only says there is a bug with the zoom button; 'map zooms and popup stays' is inferred",
+    "browser and OS"
+  ],
+  "notes": "1280x720, 14 s, the popup and its zoom buttons are small; the close happens within about 0.3 s of the click. Two attempts: zoom in, then zoom out."
+}

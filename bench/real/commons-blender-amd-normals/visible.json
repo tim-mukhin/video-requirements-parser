@@ -1,0 +1,17 @@
+{
+ "recording": "recording.webm",
+ "reviewer": "claude, from frames and the issue text",
+ "control": false,
+ "shows_bug": "yes",
+ "steps": [
+  {"t": "00:00.0", "action": "Blender viewport in Material Preview shading (HDRI blurred background, look-dev spheres), simple floor+wall mesh 'Ground.001' selected; orbits the view"},
+  {"t": "00:12.0", "action": "switches to Solid shading: plain grey mesh, no artefacts (12.0-14.0)"},
+  {"t": "00:14.5", "action": "viewport shows only the orange selection outline on grey (14.5-19.0)"},
+  {"t": "00:19.5", "action": "switches to Rendered with Cycles ('Path Tracing Sample 5/16' at 00:21.0): textured stone floor and wall on grass HDRI, shading correct"},
+  {"t": "00:24.5", "action": "back to Material Preview, orbits the view until the end"}
+ ],
+ "actual": "In Material Preview (Eevee) the mesh shows broken shading: at 00:00-00:11 and 00:31-00:52 the wall/floor are covered with red, green and yellow glowing sparkle spots and bloom that move as the view orbits; at 00:24.5-00:30 the faces render flat black, and at 00:27.5-00:30 parts of the mesh appear as stretched white/transparent shapes. The same mesh is clean in Solid (00:12-00:14) and in Cycles Rendered (00:19.5-00:24).",
+ "decisive": "00:02.0 Material Preview: red glowing speckle artefacts over the wall, versus 00:21.0 Cycles render of the same mesh with clean stone texture",
+ "not_visible": ["AMD GPU and the driver update", "Blender version 2.9 / fix in 2.91.2", "the High Quality Normals option (not toggled in the video)", "that Eevee is the render engine is only inferred from Material Preview shading"],
+ "notes": "No cursor clicks visible on the shading buttons; mode changes judged from the viewport look and the header shading toggle (zoomed at 00:02 and 00:21). Background is a blurred HDRI, so artefacts partly blend with bloom."
+}

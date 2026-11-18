@@ -1,0 +1,23 @@
+{
+  "id": "vscode-319307",
+  "url": "https://github.com/microsoft/vscode/issues/319307",
+  "kind": "github",
+  "licence": "GitHub issue attachment (user content, no explicit licence); private testing only",
+  "long": false,
+  "platform": "desktop (VS Code, chat sessions view)",
+  "files": [
+    {
+      "file": "recording.mp4",
+      "source": "https://github.com/user-attachments/assets/ec7aa905-5e56-4de1-b8a8-a575b974751d",
+      "origin": "issue body by aiday-mar",
+      "duration_s": 8.5,
+      "resolution": "2264x914",
+      "has_audio_track": false,
+      "speech": "none (no audio track)"
+    }
+  ],
+  "bug_in": "the only recording",
+  "description": "Dragging an already open chat session view highlights half of its own view and half of the sibling, but dropping makes it take the full space.",
+  "expected_report": "Dragging the 'Farewell message' chat view shows a drop highlight that covers half of its own view and half of the neighbour; after release it occupies the full space. The preview does not match the result. A maintainer notes this matches editor drag and drop and is a known simplification.",
+  "difficulty": "Drag-and-drop preview overlay, short, internal test-plan item; arguably 'by design'."
+}

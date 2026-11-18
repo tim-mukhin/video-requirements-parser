@@ -1,0 +1,23 @@
+{
+  "id": "kde-528786",
+  "url": "https://bugs.kde.org/show_bug.cgi?id=528786",
+  "kind": "bugzilla",
+  "licence": "public bug tracker attachment (no explicit licence); private testing only",
+  "long": false,
+  "platform": "desktop (KDE System Settings, Plasma 6.8, Wayland)",
+  "files": [
+    {
+      "file": "recording.mp4",
+      "source": "https://bugs.kde.org/attachment.cgi?id=198428",
+      "origin": "attachment 198428 'Video_2026-11-13_07-51-07.mp4' by <email>",
+      "duration_s": 23.3,
+      "resolution": "3840x2160",
+      "has_audio_track": true,
+      "speech": "none (silent audio track)"
+    }
+  ],
+  "bug_in": "the only recording",
+  "description": "The Default button resets the whole settings category, not only the current page, without warning.",
+  "expected_report": "In a category such as Accessibility the user changes and applies settings on one page, then presses Default: all pages in the category are reset. Expected: reset only the current page, or warn that the whole category will be reset.",
+  "difficulty": "4K recording with small UI, the effect is on pages not currently visible."
+}

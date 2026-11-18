@@ -1,0 +1,22 @@
+{
+  "recording": "recording.mp4",
+  "reviewer": "claude, from frames and the issue text",
+  "control": false,
+  "shows_bug": "yes",
+  "steps": [
+    {"t": "00:00.5", "action": "Penpot (Italian UI), page 'Bug 1': a product card 'Card' with nested flex boards (Image, TextWrapper > HeaderWrapper > Title/Text, Text, Board of tags, Divider, Wrapper, Button)"},
+    {"t": "00:02.0", "action": "selects Card: W 343, H 645, layout panel shown"},
+    {"t": "00:09.5", "action": "selects the tags 'Board' (sporty / weekend / pink) and deletes it (gone at 00:11.0)"},
+    {"t": "00:15.0", "action": "selects Card again; H still 645"},
+    {"t": "00:24.0", "action": "clicks a sizing option in the Card's flex board section"},
+    {"t": "00:31.0", "action": "drags the Card's right edge to make it wider (W 385 at 00:35.5), then inspects HeaderWrapper and the Text layers (00:35.5-00:48)"},
+    {"t": "00:54.5", "action": "resizes the Card again, down to about W 248 (00:58.5)"}
+  ],
+  "actual": "After the tags Board is deleted (00:11.0), the Card keeps H 645 and an empty gap stays between the 'Text:' block and the divider (00:11.0-00:22.0); only after the user clicks the sizing option again (00:24) does the Card shrink to H 597 and the gap close (00:28.5). After widening the Card (00:35.5) the text reflows to fewer lines but the HeaderWrapper and the 'Text' layer keep their old heights (HeaderWrapper H 93.78 at 00:43, Text H 57 at 00:45), leaving empty space under the text (00:40-00:45). After narrowing the Card to about W 248 (00:58.5-01:00) the text wraps to more lines but the containers do not grow: 'sed do eiusmod' overlaps the 'Text:' block and the price '00€' touches the stars.",
+  "decisive": "00:11.0 vs 00:28.5: with the tags Board deleted the Card stays H 645 with an empty gap; it only shrinks to H 597 after the sizing option is clicked again",
+  "not_visible": [
+    "which elements are set to Hug and which to Fill - the sizing icons are too small to read reliably",
+    "browser and OS (Chrome on macOS per the issue)"
+  ],
+  "notes": "1920x824, 60 s, dense side panels with small Italian labels; numbers (W/H) were read from full-resolution frames. The exact control clicked at 00:24 is not certain."
+}

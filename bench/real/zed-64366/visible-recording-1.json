@@ -1,0 +1,18 @@
+{
+ "recording": "recording-1.mp4",
+ "reviewer": "claude, from frames and the issue text",
+ "control": false,
+ "shows_bug": "yes",
+ "steps": [
+  {"t": "00:00.0", "action": "Zed (light theme, 'Restart to Update' in title bar), project 'jellyfin-web' in the Project Panel on the right; folder context menu open on 'components': it runs to the bottom edge, last visible item 'Expand All' cut by the frame edge, nothing below it"},
+  {"t": "00:04.0", "action": "closes the menu, right-clicks folders lower in the tree (04.5-14.5): each folder menu again reaches the bottom edge"},
+  {"t": "00:15.0", "action": "scrolls the Project Panel down to show files (src/*.ts, *.tsx, config files)"},
+  {"t": "00:18.5", "action": "right-clicks a file mid-panel: file menu ends at 'Rename' at the bottom edge (18.7)"},
+  {"t": "00:24.5", "action": "right-clicks a file higher up: the menu is complete, ending with 'Rename / Trash / Delete' and its bottom border (25.0)"},
+  {"t": "00:28.0", "action": "right-clicks files lower down (28.0-36.0): menu opens downward from the click and ends at 'Rename' cut by the bottom edge; 'Trash' and 'Delete' are not shown (28.5, 32.5, 35.0)"}
+ ],
+ "actual": "In Zed, a Project Panel context menu opened near the bottom of the window always opens downward from the click and runs past the bottom edge: lower items are cut off (folder menu ends at a clipped 'Expand All' at 00:00; 'Trash' and 'Delete' below 'Rename' for files at 28.5-35.0). Opened higher (25.0), the same file menu shows all items including Trash and Delete.",
+ "decisive": "00:25.0 file menu complete with 'Rename / Trash / Delete'; 00:32.5 same menu opened lower ends at 'Rename' on the bottom edge, 'Trash' and 'Delete' cut off",
+ "not_visible": ["the VS Code comparison (it is in the other recording)", "whether the frame bottom is exactly the window/screen edge (capture is 1918x1126, the window fills it)", "Zed version"],
+ "notes": "This recording is the Zed (bug) side; menu items like 'Reveal in File Manager', 'Open File Permalink', 'Restart to Update' identify Zed. The app occupies a narrow right strip with a large empty editor area, so contact sheets are tiny; items read from full-res crops."
+}

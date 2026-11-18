@@ -1,0 +1,17 @@
+{
+  "id": "ffandroid-2091774",
+  "url": "https://bugzilla.mozilla.org/show_bug.cgi?id=2091774",
+  "media_url": "https://bugzilla.mozilla.org/attachment.cgi?id=9679420",
+  "files": [
+    "recording.mp4"
+  ],
+  "licence": "Attachment in a public bug tracker (bugzilla.mozilla.org); no explicit licence on the media. Public; fine for private internal testing, do not redistribute.",
+  "platform": "phone (Firefox Nightly for Android)",
+  "duration_s": 45.4,
+  "resolution": "526x1170 (portrait)",
+  "speech": "none (no audio track)",
+  "description": "[IPProtection] VPN 'Connecting' state disappears too quickly to read after tapping the VPN toggle in the menu.",
+  "expected_report": "Signed in to the built-in VPN with VPN off, the user opens the menu (homepage menu, trust panel or page menu), waits a few seconds and taps the VPN 'Off' toggle. Expected: a 'Connecting' state that stays long enough to read, or none if the connection is instant. Actual: 'Connecting' flashes for a fraction of a second, then 'On' appears; the address-bar badge also passes through an intermediate state. Rapid taps do not reproduce it.",
+  "difficulty": "The key fact is a sub-second state flash; several menus look alike; the page content (Mullvad 'Not using Mullvad VPN') contradicts the toggle state, which is a distractor or a second finding.",
+  "long": false
+}

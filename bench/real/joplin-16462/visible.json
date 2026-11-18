@@ -1,0 +1,19 @@
+{
+ "recording": "recording.mp4",
+ "reviewer": "claude, from frames and the issue text",
+ "control": false,
+ "shows_bug": "yes",
+ "steps": [
+  {"t": "00:00.4", "action": "note 'Testing!' is open in the iOS editor with the keyboard up and the editor toolbar shown"},
+  {"t": "00:02.0", "action": "opens the search panel from the toolbar; the 'Search for...' field gets focus (uppercase keyboard with a blue search key)"},
+  {"t": "00:02.7", "action": "taps the 'Hide keyboard' toolbar button several times (button dims at 00:02.7, 00:03.2-00:03.4, 00:03.6-00:03.9, 00:04.1)"},
+  {"t": "00:04.5", "action": "focus moves to the note body (lowercase keyboard, caret after 'test...')"},
+  {"t": "00:05.3", "action": "taps 'Hide keyboard' with the editor focused; the keyboard slides away at 00:05.4"},
+  {"t": "00:06.6", "action": "keyboard comes back with the editor focused"},
+  {"t": "00:08.0", "action": "focuses the search field again and taps 'Hide keyboard' (button dims at 00:08.6)"}
+ ],
+ "actual": "While the search field is focused (00:02.0-00:04.4 and 00:08.0-00:09.6) the keyboard stays on screen although the Hide keyboard button visibly reacts to taps. With the note body focused, the same button hides the keyboard at 00:05.4 (00:05.4-00:06.5 no keyboard, search bar still shown).",
+ "decisive": "00:08.6: Hide keyboard button pressed with the search field focused; the keyboard is still visible through the end at 00:09.6",
+ "not_visible": ["touch points (no tap indicator); taps inferred from the button dimming and focus changes", "what moved focus to the note body at 00:04.5", "Joplin / iOS version"],
+ "notes": "Taps are only inferable from the button's pressed state; the editor-focused hide at 00:05.4 acts as an in-video contrast."
+}

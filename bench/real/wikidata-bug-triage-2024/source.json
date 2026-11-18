@@ -1,0 +1,17 @@
+{
+  "id": "wikidata-bug-triage-2024",
+  "url": "https://commons.wikimedia.org/wiki/File:Bug_Triage_Hour_(Lexeme_Interface)_(Lexicodays_2024).webm",
+  "media_url": "https://upload.wikimedia.org/wikipedia/commons/c/c0/Bug_Triage_Hour_%28Lexeme_Interface%29_%28Lexicodays_2024%29.webm",
+  "files": [
+    "recording.webm"
+  ],
+  "licence": "CC BY-SA 4.0 (Wikimedia Commons file page)",
+  "platform": "meeting recording (video call with screen share of Wikidata and Phabricator)",
+  "duration_s": 2467,
+  "resolution": "1920x1020 25fps",
+  "speech": "Indonesian host with English parts (Lydia Pintscher, Wikidata product manager); several voices",
+  "description": "Bug Triage Hour for the Wikidata Lexeme interface during Lexicodays 2024: participants bring problems, the team reproduces them live on wikidata.org and files or updates Phabricator tickets.",
+  "expected_report": "Not one bug but a triage session: for each discussed problem the parser should give what was shown (Lexeme pages, Phabricator tasks such as 'gloss text entry box is too short and hard to edit', the Lexicographical data workboard), which ticket was created or updated, its tags (e.g. UX team), and who raised the question. Decisions vs proposals should be separated.",
+  "difficulty": "41 minutes, two languages with code-switching, small browser text in screen share, participant tiles overlapping the screen, switching between many tabs.",
+  "long": true
+}

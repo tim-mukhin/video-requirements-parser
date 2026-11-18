@@ -1,0 +1,29 @@
+{
+  "recording": "recording.mp4",
+  "reviewer": "claude, from frames and the issue text",
+  "control": false,
+  "shows_bug": "partly",
+  "steps": [
+    {"t": "00:00.0", "action": "Home Assistant automation 'Presence' open in a Safari-style window on macOS, When / And if / Then do sections"},
+    {"t": "00:02.5", "action": "expands Option 1 of 'Choose between 5 options' and clicks its 'Add condition'"},
+    {"t": "00:04.0", "action": "'Add condition' dialog opens on the By target tab with the area tree"},
+    {"t": "00:06.4", "action": "types 'night' in the search field, letters appear one by one up to 00:07.4"},
+    {"t": "00:09.25", "action": "results list (Conditions: It is night ...) replaces the area tree, about 1.9 s after the last letter"},
+    {"t": "00:10.5", "action": "'night lux' fully typed; results narrow to the single entity Night Lux only at 00:12.0"},
+    {"t": "00:15.5", "action": "clicks Night Lux; at 00:16.0 the tree shows Night Lux highlighted but the right pane still says 'Select a target'"},
+    {"t": "00:28.0", "action": "clicks Night Lux again, a spinning busy pointer shows at 00:28.5, right pane stays 'Select a target'"},
+    {"t": "00:32.0", "action": "opens the Stats CPU menu: top process 'Home Assistant Web Content 110.7%' at 00:33.0"},
+    {"t": "00:40.5", "action": "clicks Night Lux several more times and scrolls the tree; right pane never shows conditions for it"},
+    {"t": "00:59.0", "action": "pointer on the 'By type' tab (hand), the tab switches only at 01:03.1-01:03.75"},
+    {"t": "01:10.5", "action": "Blocks tab (And/Not/Or) opens quickly, then back to By target at 01:13.0"},
+    {"t": "01:15.0", "action": "clicks Night Lux again, still 'Select a target' until the end at 01:24.0"}
+  ],
+  "actual": "In the Add condition dialog, search results update 1.5-2 s after typing, the By type tab switches about 4 s after the pointer reaches it, and selecting the Night Lux entity never fills the right pane during the recording. The Safari web content process uses about 110% CPU.",
+  "decisive": "00:33.0 Stats shows 'Home Assistant Web Content 110.7%' as the top process; 00:15.5-01:24 Night Lux is selected but the right pane keeps 'Select a target'.",
+  "not_visible": [
+    "the exact click moments, so delays are measured from pointer arrival or the last typed letter",
+    "Opera/Chromium comparison: only one browser is recorded",
+    "whether the right pane would eventually fill for Night Lux"
+  ],
+  "notes": "Labelled partly: slowness is visible (search lag, tab switch lag, busy cursor, high CPU) but the delays are seconds, not extreme, and the main symptom is the target pane never responding, which could also be a functional bug. Typing itself echoes without obvious lag. Blocks tab switched with no visible delay."
+}

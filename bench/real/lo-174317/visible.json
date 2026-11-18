@@ -1,0 +1,24 @@
+{
+  "recording": "recording.mp4",
+  "reviewer": "claude, from frames and the issue text",
+  "control": false,
+  "shows_bug": "yes",
+  "steps": [
+    {"t": "00:00.0", "action": "terminal on Linux (ROSA, KDE): 'rm -rf /home/user/.config/libreofficedev', then 'libreofficedev27.2 /home/user/Testing files/temp-empty-file.odt'"},
+    {"t": "00:05.0", "action": "in LibreOfficeDev Writer opens Tools > Options; in Load/Save > General 'Save AutoRecovery information every 1 minutes' and 'Automatically save the document instead' are checked (00:10.5); clicks OK"},
+    {"t": "00:11.5", "action": "LibreOffice closes and is started again from the terminal with the same file (00:13.0); a 'Tip of the Day' dialog is closed (00:14)"},
+    {"t": "00:16.0", "action": "types 'Some text' in the document, then waits about 70 s without action"},
+    {"t": "01:29.5", "action": "switches to the terminal and stops LibreOffice with Ctrl+C ('^C' in the terminal), then runs the same command again (01:35.5)"},
+    {"t": "01:37.5", "action": "Document Recovery dialog lists temp-empty-file.odt 'Not recovered yet'; clicks 'Recover Selected'"},
+    {"t": "01:45.8", "action": "clicks Cancel in the last dialog; Writer opens temp-empty-file.odt containing 'Some text' (01:46.5)"}
+  ],
+  "actual": "Instead of just opening the autosaved document, LibreOffice shows a chain of dialogs after the restart: Document Recovery with temp-empty-file.odt 'Not recovered yet' (01:37.5); 'The file 'temp-empty-file.odt' is corrupt and therefore cannot be opened... Should LibreOfficeDev repair the file?' Yes/No (01:39.0-01:41.0); 'The file 'temp-empty-file.odt' could not be repaired and therefore cannot be opened.' OK (01:41.5-01:43.0); Document Recovery 'Original document recovered' with Finish (01:43.5-01:44.5); 'The automatic recovery process was interrupted' Save/Cancel with Save to /home/user/Документы (01:45.0-01:45.8). After that the file opens normally with 'Some text' (01:46.5). The recording ends on the OBS window that recorded the screen (01:48).",
+  "decisive": "01:39.2: after restart, a dialog says 'The file 'temp-empty-file.odt' is corrupt and therefore cannot be opened', followed by 'could not be repaired', yet the file opens fine with 'Some text' at 01:46.5",
+  "not_visible": [
+    "Windows and killing soffice.bin in Task Manager - the video is on Linux and LibreOffice is stopped with Ctrl+C in the terminal that launched it",
+    "that an autosave actually happened during the 70 s wait (no indicator is visible)",
+    "the empty file name in the error ('The file '' is corrupt') - the video shows the file name 'temp-empty-file.odt'",
+    "that this is a regression since 25.8 - the build shown is LibreOfficeDev 27.2"
+  ],
+  "notes": "1920x1080, 109 s, about 70 s of static waiting (00:17-01:29). Dialog text is readable only at full resolution. Terminal and OBS UI are in Russian."
+}

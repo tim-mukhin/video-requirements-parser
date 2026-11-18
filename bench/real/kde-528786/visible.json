@@ -1,0 +1,19 @@
+{
+ "recording": "recording.mp4",
+ "reviewer": "claude, from frames and the issue text",
+ "control": false,
+ "shows_bug": "yes",
+ "steps": [
+  {"t": "00:00.0", "action": "System Settings (Portuguese UI) open on Acessibilidade > Lente de aumento; 'Melhorar a nitidez do conteúdo da tela ao aplicar zoom' is unchecked; the pointer hovers the checkboxes without changing them"},
+  {"t": "00:06.0", "action": "opens the 'Agitar ponteiro' page ('Agitar o ponteiro para encontrá-lo: Habilitar' is checked)"},
+  {"t": "00:07.5", "action": "unchecks 'Habilitar' (title gets '*', Restaurar and Aplicar become active)"},
+  {"t": "00:10.0", "action": "clicks Aplicar"},
+  {"t": "00:14.0", "action": "clicks Padrões (Defaults) on the Agitar ponteiro page; 'Habilitar' becomes checked again"},
+  {"t": "00:16.5", "action": "clicks Aplicar"},
+  {"t": "00:18.5", "action": "goes back to the Lente de aumento page"}
+ ],
+ "actual": "Padrões was pressed only on the Agitar ponteiro page, with no confirmation or warning (00:14.0-00:14.5). After applying, the Lente de aumento page shows 'Melhorar a nitidez do conteúdo da tela ao aplicar zoom' checked at 00:19.0, while it was unchecked at 00:00.0-00:05.5 and was never touched on that page.",
+ "decisive": "00:19.0: on Lente de aumento the 'Melhorar a nitidez...' checkbox is now checked, unchecked at 00:00.0 - reset by Padrões pressed on a different page",
+ "not_visible": ["whether other pages of the category were also reset (only Lente de aumento and Agitar ponteiro are shown)", "Plasma version"],
+ "notes": "4K capture with the window small in the middle; text readable only in crops. UI in Portuguese (Padrões = Defaults, Aplicar = Apply, Restaurar = Reset)."
+}

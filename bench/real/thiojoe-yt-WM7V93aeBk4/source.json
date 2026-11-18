@@ -1,0 +1,25 @@
+{
+ "id": "thiojoe-yt-WM7V93aeBk4",
+ "url": "https://www.youtube.com/watch?v=WM7V93aeBk4",
+ "kind": "youtube",
+ "licence": "YouTube; private testing only",
+ "long": false,
+ "platform": "phone (YouTube app on iOS) and web, edited YouTube video",
+ "files": [
+  {
+   "file": "recording.mp4",
+   "source": "https://www.youtube.com/watch?v=WM7V93aeBk4",
+   "origin": "YouTube",
+   "duration_s": 496.0,
+   "resolution": "1920x1080",
+   "has_audio_track": true,
+   "ext": "mp4",
+   "speech": "speech (en), checked on a 2-min sample from 0 s"
+  }
+ ],
+ "bug_in": "the only recording",
+ "description": "YouTube's watched-progress overlay on thumbnails is wrong: videos show as fully watched when barely started, and bars change just by scrolling a playlist.",
+ "expected_report": "In playlists the red progress bar on thumbnails shows wrong values (100% for videos only partly or barely watched); scrolling the playlist alone changes the bars randomly. The author checks API/desktop responses. Expected: progress bars match actual watch progress and do not change when scrolling.",
+ "difficulty": "Edited video with cuts, talking head, zooms and b-roll; phone recordings inside; long (8 min).",
+ "not_repro": "an edited video about bugs (vlog or explainer), not a recording of one bug repro; left out of the bug set"
+}

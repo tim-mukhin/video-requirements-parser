@@ -1,0 +1,15 @@
+{
+ "recording": "recording.mp4",
+ "reviewer": "claude, from frames and the issue text",
+ "control": false,
+ "shows_bug": "yes",
+ "steps": [
+  {"t": "00:00.8", "action": "moves the mouse slowly over the editor text area of main.dart"},
+  {"t": "00:02.7", "action": "moves the mouse onto the Explorer tree (deep_link_resolver.dart, then trainer_routes rows) and holds it nearly still"},
+  {"t": "00:04.0", "action": "moves back over the editor, then to the right edge next to the iOS simulator"}
+ ],
+ "actual": "The cursor shape keeps switching while the mouse barely moves. Over the editor text (00:01.00-00:02.50) it alternates I-beam and arrow at the same spot, e.g. I-beam at 00:02.20, arrow 00:02.25-00:02.45, I-beam at 00:02.50 with no position change. Over the Explorer rows it alternates hand and arrow: hand 00:02.70-00:03.35, arrow 00:03.40-00:03.50, hand again 00:03.55, with only a few pixels of movement.",
+ "decisive": "00:03.35 -> 00:03.40: over the same highlighted Explorer row the cursor changes from the hand to the arrow without real movement, and back to the hand at 00:03.55",
+ "not_visible": ["Activity Bar, tabs and buttons are not hovered in the clip; only Explorer rows and the editor", "whether the mouse is fully still (it drifts a few pixels most of the time)", "VS Code version / OS settings"],
+ "notes": "Cursor is tiny on a 2366x1746 capture; only visible in 20 fps crops, not at 4 fps. In the editor the flicker is I-beam vs arrow rather than hand vs arrow. After ~00:04.7 the cursor sits at the edge of the simulator and is barely visible."
+}

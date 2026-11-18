@@ -1,0 +1,19 @@
+{
+ "recording": "recording-1.mp4",
+ "reviewer": "claude, from frames and the issue text",
+ "control": false,
+ "shows_bug": "yes",
+ "steps": [
+  {"t": "00:00.0", "action": "excalidraw.com in Chrome on Android, a selected circle in the middle of the canvas"},
+  {"t": "00:00.8", "action": "long-presses the circle; the element context menu opens"},
+  {"t": "00:03.2", "action": "taps away, menu closes and selection clears"},
+  {"t": "00:03.9", "action": "long-presses empty canvas below the circle; the canvas context menu (Paste ... Stats for nerds) opens"},
+  {"t": "00:07.2", "action": "long-presses again, menu opens below the circle and closes at 00:07.8"},
+  {"t": "00:09.5", "action": "selects the circle and drags it to the top-left of the canvas"},
+  {"t": "00:11.2", "action": "long-presses the circle, then again at 00:14.6, each time the element context menu opens"}
+ ],
+ "actual": "The context menu opens in one place and then jumps: the canvas menu appears fully under the circle at 00:03.97-00:04.10 and at 00:04.17 jumps to the right edge where it is cut off ('Copy to clipbo...'). The element menu at 00:14.63-00:14.83 opens next to the circle's top edge and at 00:14.90 drops lower so its bottom items (Flip vertical, Create link, Duplicate, Lock, Delete) run off the bottom of the screen; same downward shift at 00:11.2 -> 00:11.5. The first element menu (00:00.8-00:03.0) sits at the right edge, partly off-screen.",
+ "decisive": "00:04.10 -> 00:04.17: the canvas context menu, already shown fully below the circle, jumps to the right screen edge and is clipped",
+ "not_visible": ["device model and browser version (only Chrome UI and excalidraw.com are visible)", "touch points: long-presses are inferred from the menu appearing", "scrolling inside the menu is not attempted"],
+ "notes": "Phone screen recording, 30 fps, no touch indicators. The jump is 1-2 frames, visible only at >=15 fps."
+}

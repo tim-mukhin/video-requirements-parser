@@ -1,0 +1,19 @@
+{
+  "recording": "recording.mp4",
+  "reviewer": "claude, from frames and the issue text",
+  "control": false,
+  "shows_bug": "yes",
+  "steps": [
+    {"t": "00:00.0", "action": "Joplin desktop, a shared notebook 'Test' (share icon, count 3) is open with notes Test 3, Test 2, Test 1"},
+    {"t": "00:01.2", "action": "selects Test 2, then also Test 3 (00:01.8); the editor area shows the multi-selection action buttons (00:02.0)"},
+    {"t": "00:04.0", "action": "clicks 'Delete note' in the multi-selection panel"},
+    {"t": "00:07.2", "action": "clicks 'Synchronize' at the bottom left"}
+  ],
+  "actual": "After 'Delete note' Test 3 and Test 2 vanish from the list and a green toast says 'The notes were successfully moved to the trash. Cancel' (00:04.5-00:09.5); the notebook count drops from 3 to 1. No error or refusal is shown. After Synchronize, Test 2 reappears at 00:07.8 and Test 3 at 00:08.0; the count is back to 3.",
+  "decisive": "00:04.5: Test 2 and Test 3 disappear with 'The notes were successfully moved to the trash', then reappear after sync at 00:07.8-00:08.0",
+  "not_visible": [
+    "that the notes are read-only / shared from Joplin Cloud with read-only rights - only a share icon is visible next to the notebook",
+    "Joplin version and OS"
+  ],
+  "notes": "10 s, small dark UI; the multi-selection is shown by the grey highlight of two rows. Sidebar counts are tiny but readable at full frame."
+}

@@ -1,0 +1,23 @@
+{
+  "recording": "recording.mp4",
+  "reviewer": "claude, from frames and the issue text",
+  "control": false,
+  "shows_bug": "yes",
+  "steps": [
+    {"t": "00:00.0", "action": "Blender 3.6.0 Beta, Geometry Nodes: Curve Circle (Resolution 8, Radius 1 m) + Curve Line (0,0,0 to 0,0,1) -> Curve to Mesh -> Extrude Mesh (Faces, Selection = Index == 1, Offset Scale 1.000, Individual off) -> Delete Geometry (Face, Selection = Index == B) -> Group Output; spreadsheet shows vertex positions"},
+    {"t": "00:01.0", "action": "with B = 7 one face of the extruded block is missing in the viewport; the user orbits the viewport"},
+    {"t": "00:36.0", "action": "mutes Delete Geometry (viewport shows the full extruded mesh), later mutes Extrude Mesh (00:47, plain 8-sided open cylinder), then unmutes and keeps changing B"},
+    {"t": "01:58.0", "action": "leaves Blender via the Windows Start menu and reads node_geo_extrude_mesh.cc on github.com, searching for 'individu' (02:02-02:23)"},
+    {"t": "02:31.0", "action": "back in Blender, B = 8, Individual off: a side face of the extruded block is deleted (a hole in the block)"},
+    {"t": "02:31.5", "action": "ticks Individual on Extrude Mesh"},
+    {"t": "02:45.0", "action": "with Individual on, changes B (9, later 11) to find which face now has which index"}
+  ],
+  "actual": "With the same Delete Geometry selection (Index == 8), the deleted face changes when Individual is toggled: at 02:31.0 (Individual off) a side face of the extruded block is gone; at 02:32.5 (Individual on) the block looks closed from the same view. With Individual on, a side hole appears with B = 9 (02:45.0) and B = 11 (02:55). The vertex position column in the spreadsheet (20 rows) does not change at the toggle.",
+  "decisive": "02:31.0 vs 02:32.5: same Index == 8 deletion, Individual off removes a side face of the extruded block, Individual on removes a different face (block appears closed from this angle)",
+  "not_visible": [
+    "a face index overlay or the spreadsheet Face domain - the order is only probed indirectly by deleting the face with a chosen index",
+    "the author's statement of what order he expects",
+    "narration, if any - not checked"
+  ],
+  "notes": "3 min 6 s of mostly static UI at 1920x1080; node values are only readable at full resolution. About 20 s is spent in a browser reading Blender source code (01:58-02:24). Before 02:31 Individual is unchecked in every sampled frame (00:01, 00:14, 00:36, 00:47, 01:18, 02:30); I did not inspect every second of 00:50-01:57, where B is changed several times."
+}

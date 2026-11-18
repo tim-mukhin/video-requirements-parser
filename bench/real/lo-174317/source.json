@@ -1,0 +1,23 @@
+{
+  "id": "lo-174317",
+  "url": "https://bugs.documentfoundation.org/show_bug.cgi?id=174317",
+  "kind": "bugzilla",
+  "licence": "public bug tracker attachment (no explicit licence); private testing only",
+  "long": false,
+  "platform": "desktop (LibreOffice Writer on Windows)",
+  "files": [
+    {
+      "file": "recording.mp4",
+      "source": "https://bugs.documentfoundation.org/attachment.cgi?id=209639",
+      "origin": "attachment 209639 'Repro_ 11.11.2026 13_34.mp4' by <email>",
+      "duration_s": 108.9,
+      "resolution": "1920x1080",
+      "has_audio_track": true,
+      "speech": "none (silent audio track)"
+    }
+  ],
+  "bug_in": "the only recording",
+  "description": "With 'Automatically save the document instead' enabled, recovery after a crash shows a chain of error dialogs.",
+  "expected_report": "Options set to autosave the document itself; the user types, waits for autosave, kills soffice.bin, then starts LibreOffice again. Instead of opening the document, a chain of dialogs appears: document recovery, 'The file '' is corrupt', repair error, 'original document recovered', 'recovery was interrupted'; after that the file opens fine. Expected: the autosaved document opens without dialogs. Regression since 25.8.",
+  "difficulty": "Long (109 s), settings dialog plus Task Manager/process kill, a chain of modal dialogs to read in order."
+}

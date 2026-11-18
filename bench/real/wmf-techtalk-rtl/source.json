@@ -1,0 +1,17 @@
+{
+  "id": "wmf-techtalk-rtl",
+  "url": "https://commons.wikimedia.org/wiki/File:Tech_Talk_-_Nothing_Left_but_Always_Right_-_The_Twisted_Road_to_RTL_Support.webm",
+  "media_url": "https://upload.wikimedia.org/wikipedia/commons/b/bb/Tech_Talk_-_Nothing_Left_but_Always_Right_-_The_Twisted_Road_to_RTL_Support.webm",
+  "files": [
+    "recording.webm"
+  ],
+  "licence": "CC BY 3.0 (Wikimedia Commons file page)",
+  "platform": "meeting/talk recording (slides full screen, room camera, Google Hangouts frame)",
+  "duration_s": 2801,
+  "resolution": "1280x720 (~42fps variable)",
+  "speech": "English, one presenter plus audience questions",
+  "description": "Wikimedia Tech Talk on right-to-left language support: slides about script direction, mixed-direction text, numbers and cursor movement, with screenshots of Hebrew Wikipedia.",
+  "expected_report": "A slide timeline: which slide was on screen when (e.g. 'Reversed mental model', 'English content with Hebrew interface', 'Numbers', 'Cursor movement'), what the presenter said about each, and the Q&A part with the room camera. No bug report expected; checks slide detection and speech-to-slide alignment.",
+  "difficulty": "Dark slides (breaks the 'brightest region' heuristic for the shared screen), mixed LTR/RTL text and Hebrew on slides, switches between slides and a room camera, 47 minutes.",
+  "long": true
+}

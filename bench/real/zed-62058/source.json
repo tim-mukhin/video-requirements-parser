@@ -1,0 +1,17 @@
+{
+  "id": "zed-62058",
+  "url": "https://github.com/zed-industries/zed/issues/62058",
+  "media_url": "https://github.com/user-attachments/assets/9ca41d77-a316-4419-a1d1-a218a9e80622",
+  "files": [
+    "recording.mp4"
+  ],
+  "licence": "GitHub issue attachment: user-uploaded content under GitHub Terms of Service; the project code licence does not automatically cover it. Public; fine for private internal testing, do not redistribute.",
+  "platform": "desktop (Zed 1.13.1 on macOS)",
+  "duration_s": 42.0,
+  "resolution": "2398x1056 60fps",
+  "speech": "none (audio track has no speech, only noise/keyboard)",
+  "description": "A typed backtick is inserted next to the previously typed backtick instead of at the new cursor position.",
+  "expected_report": "The user types a backtick in a Go file, clicks elsewhere in the file (mouse, not arrow keys) and types another backtick. Expected: the backtick appears at the new cursor. Actual: it is inserted next to the earlier backtick, building a run of backticks there; reproduced again in docker-compose.yml.",
+  "difficulty": "Dark theme (One Dark), small monospace code text, the change is one or a few characters, the cursor is a thin I-beam, two files.",
+  "long": false
+}

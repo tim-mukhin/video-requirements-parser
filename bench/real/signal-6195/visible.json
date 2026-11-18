@@ -1,0 +1,18 @@
+{
+ "recording": "recording.mp4",
+ "reviewer": "claude, from frames and the issue text",
+ "control": false,
+ "shows_bug": "yes",
+ "steps": [
+  {"t": "00:00.0", "action": "macOS, Signal markup editor on a white image (Discard / Save, colour slider, Done); the window top sits at the top of the screen, image top a few px below it"},
+  {"t": "00:00.5", "action": "draws near the top edge of the image: a green 'N'-shaped stroke appears (00.8-01.0)"},
+  {"t": "00:01.5", "action": "presses and drags again near the top edge: no new stroke, instead the whole window moves (down at 01.8, right at 03.0, again at 04.0; window frame and traffic-light buttons shift against the desktop)"},
+  {"t": "00:04.8", "action": "a short stroke attempt leaves only a small green tick next to the 'N'"},
+  {"t": "00:05.5", "action": "further presses near the top drag the window around (down at 05.8-06.8, up at 07.8, down at 08.0)"},
+  {"t": "00:08.5", "action": "one more attempt adds a small green hook stroke at the top (08.5-09.2); video ends"}
+ ],
+ "actual": "Strokes started at the very top of the canvas sometimes draw (the 'N' at 00.8, small marks at 04.8 and 08.5) but most presses there move the whole Signal window across the desktop instead (01.8-08.0), visible as the window frame and traffic lights shifting relative to the wallpaper.",
+ "decisive": "00:01.5-00:04.0: pressing and dragging near the canvas top moves the whole window (down, then right) and no line is drawn",
+ "not_visible": ["the draft and attachment steps before the editor", "Signal Desktop version", "the exact title-bar drag region boundary"],
+ "notes": "1920x2204 screen capture at 60 fps; the recorder draws a circle at each press. Which presses drew and which dragged is inferred from new green marks vs window movement; the boundary between the two cases is not shown."
+}

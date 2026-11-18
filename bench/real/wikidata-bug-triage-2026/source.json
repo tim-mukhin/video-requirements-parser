@@ -1,0 +1,23 @@
+{
+  "id": "wikidata-bug-triage-2026",
+  "url": "https://commons.wikimedia.org/wiki/File:Bug_Triage_Hour_-_Wikidata_WikiProjects_Days_2026.webm",
+  "kind": "commons",
+  "licence": "CC BY 4.0",
+  "long": true,
+  "platform": "meeting recording (video call with screen share, Wikidata/Phabricator)",
+  "files": [
+    {
+      "file": "recording.webm",
+      "source": "https://upload.wikimedia.org/wikipedia/commons/0/09/Bug_Triage_Hour_-_Wikidata_WikiProjects_Days_2026.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "origin": "Wikimedia Commons file",
+      "duration_s": 2718.6,
+      "resolution": "1280x720",
+      "has_audio_track": true,
+      "speech": "speech (en), checked on a 2-min sample from 600 s"
+    }
+  ],
+  "bug_in": "the only recording",
+  "description": "Bug Triage Hour at Wikidata WikiProjects Days 2026: participants bring problems, the team reproduces them and files or updates Phabricator tickets.",
+  "expected_report": "Per discussed problem: what was shown on screen, which ticket was created or updated and with which tags, who raised it, what was decided vs only proposed.",
+  "difficulty": "Long meeting, several speakers, small browser text in screen share."
+}

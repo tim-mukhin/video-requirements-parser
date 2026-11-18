@@ -1,0 +1,17 @@
+{
+  "id": "kde-528684",
+  "url": "https://bugs.kde.org/show_bug.cgi?id=528684",
+  "media_url": "https://bugs.kde.org/attachment.cgi?id=198338",
+  "files": [
+    "recording.mp4"
+  ],
+  "licence": "Attachment in a public bug tracker (bugs.kde.org); no explicit licence on the media. Public; fine for private internal testing, do not redistribute.",
+  "platform": "desktop (KDE Plasma 6.8.80, Wayland)",
+  "duration_s": 33.3,
+  "resolution": "1920x1080 30fps",
+  "speech": "none; explanation is given as full-screen text cards between clips",
+  "description": "A pinned app disappears from the Icons-only Task Manager when its window is moved to another virtual desktop with a keyboard shortcut.",
+  "expected_report": "With a pinned app in the vertical Icons-only Task Manager and two virtual desktops, the user opens the app from its pinned icon and moves its window to the next desktop with a keyboard shortcut. Expected: the icon stays as a normal pinned launcher. Actual: the icon vanishes from the task manager until the user switches desktops or presses Meta. Text cards also say it sometimes happens with apps minimized to tray.",
+  "difficulty": "The action is a keyboard shortcut (only its effect is visible), the evidence is a small icon vanishing in a narrow vertical panel, busy fractal wallpaper, dark windows, explanation only as on-screen text.",
+  "long": false
+}

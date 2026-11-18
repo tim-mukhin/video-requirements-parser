@@ -1,0 +1,15 @@
+{
+ "recording": "recording-4.mp4",
+ "reviewer": "claude, from frames and the issue text",
+ "control": true,
+ "shows_bug": "no",
+ "steps": [
+  {"t": "00:00.0", "action": "excalidraw.com in an Android browser (dark theme), a rectangle near the bottom-left of the canvas"},
+  {"t": "00:02.0", "action": "long-presses the rectangle; the element context menu opens at 00:02.5"},
+  {"t": "00:03.5", "action": "taps away to close it, then repeats the long-press: menu shown at 00:04.8, 00:07.0, 00:09.2, 00:11.2, 00:13.5, 00:15.8, 00:17.8, 00:20.0, 00:22.0"}
+ ],
+ "actual": "Ten long-presses, each opens the element context menu (Cut ... Delete) in the same place, to the right of and above the rectangle, fully on screen including 'Delete'. Within each opening the menu does not move.",
+ "decisive": "00:02.5-00:03.2: the menu opens directly in its final position and stays there; the same position repeats on all ten openings",
+ "not_visible": ["the browser name (Mi Browser per the issue) - only a generic URL bar with excalidraw.com is shown", "device model"],
+ "notes": "Control recording for the issue: correct behaviour. No touch indicators; long-presses inferred from selection + menu. Menu text is small but layout is clear."
+}

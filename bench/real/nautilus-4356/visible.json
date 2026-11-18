@@ -1,0 +1,22 @@
+{
+  "recording": "recording.mp4",
+  "reviewer": "claude, from frames and the issue text",
+  "control": false,
+  "shows_bug": "yes",
+  "steps": [
+    {"t": "00:00.0", "action": "GNOME Files in Home / Downloads / temp with one item, file.txt, selected"},
+    {"t": "00:01.5", "action": "the 'Rename File' popover opens with 'file' selected in the name field (F2 presumably; the key is not visible)"},
+    {"t": "00:02.8", "action": "a text context menu opens under the name field (right-click inferred; no mouse pointer is visible)"},
+    {"t": "00:03.2", "action": "the menu closes and is reopened several times (00:03.8, 00:05.2)"},
+    {"t": "00:05.8", "action": "moves through the menu items with the keyboard (highlight on Select All, Delete, Change direction, Insert Emoji; mnemonics underlined from 00:07.0)"},
+    {"t": "00:10.8", "action": "the popover closes (00:11.0)"}
+  ],
+  "actual": "The context menu's top part is drawn underneath the Rename File popover: only 'Delete', 'Select All', 'Change direction' and 'Insert Emoji' are visible, and the top items (Cut / Copy / Paste) are hidden behind the popover; only a sliver of the last hidden item peeks out above 'Delete' (00:02.8 onward, every time the menu is opened).",
+  "decisive": "00:02.8: the menu appears with its upper items covered by the Rename File popover, 'Delete' is the first readable item",
+  "not_visible": [
+    "the right-click itself and the F2 key - no pointer or key overlay is shown",
+    "the hidden item names (Cut/Copy/Paste are inferred, not readable)",
+    "GNOME Files / Fedora versions"
+  ],
+  "notes": "11 s, light theme, small UI. No mouse pointer is visible in the recording, so the trigger of each menu opening is inferred."
+}

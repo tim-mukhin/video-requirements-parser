@@ -1,0 +1,20 @@
+{
+ "recording": "recording.mp4",
+ "reviewer": "claude, from frames and the issue text",
+ "control": false,
+ "shows_bug": "yes",
+ "steps": [
+  {"t": "00:00.0", "action": "DaVinci Resolve Studio 19, Fusion page (About splash over the viewer until 08.0); node graph: ImageNoAlpha -> ChromaKeyer1, ImageWithAlpha, Outer and Inner spheres -> Merge3D1 -> MediaOut1"},
+  {"t": "00:09.0", "action": "viewer shows the Inner sphere alone (plain blue, 09-24), then the untextured Outer sphere (white, 25-33)"},
+  {"t": "00:34.0", "action": "ImageWithAlpha connected to Outer: world-map globe where the ocean areas show the blue inner sphere through (34-46, clear at 40.0)"},
+  {"t": "00:47.0", "action": "views the white Outer sphere again (47-49), then ImageNoAlpha (map on light-blue background, 50-51) and the ChromaKeyer1 output (map on a transparency checkerboard, background keyed out, 52-58)"},
+  {"t": "00:59.0", "action": "ChromaKeyer1 connected to Outer: only the country shapes are drawn, the keyed ocean areas show the dark background and no blue inner sphere (59-66, clear at 62.0)"},
+  {"t": "01:07.0", "action": "toggles back to the PNG path (white sphere 67-69, blue visible again 70-74), then to the keyer path again: inner sphere hidden (77-85)"},
+  {"t": "01:26.0", "action": "selects Inner and moves it to the right out of the outer sphere: the blue sphere shows outside, but its part inside the outer sphere stays invisible (26-33, clear at 88.0)"},
+  {"t": "01:34.0", "action": "moves Inner back: hidden again (94-96)"}
+ ],
+ "actual": "With the PNG that has a real alpha (ImageWithAlpha -> Outer) the blue inner sphere is visible through the transparent ocean areas (34-46, 70-74). With the alpha produced by ChromaKeyer1 (ImageNoAlpha -> ChromaKeyer1 -> Outer) the same areas are see-through to the background but the inner sphere is not rendered (59-66, 77-85). Moved partly outside, the inner sphere appears only where it leaves the outer sphere (86-93).",
+ "decisive": "00:40.0 globe with ImageWithAlpha shows the blue inner sphere in the ocean areas; 01:02.0 (62.0) same globe via ChromaKeyer1 shows the background there and no inner sphere",
+ "not_visible": ["Chroma Keyer settings beyond its checkerboard output", "whether the keyer output is premultiplied or other alpha options", "any narration (no ASR run)"],
+ "notes": "1920x1080 YouTube video, reviewed at 1 frame per second plus full-res crops of the node graph and viewer at 40, 62 and 88 s. Node connections read from the node graph (ImageWithAlpha node is at the lower edge, only partly visible)."
+}

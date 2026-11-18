@@ -1,0 +1,16 @@
+{
+ "recording": "recording.mp4",
+ "reviewer": "claude, from frames and the issue text",
+ "control": false,
+ "shows_bug": "partly",
+ "steps": [
+  {"t": "00:00.0", "action": "Mattermost desktop, a channel with many messages and image attachments; the user scrolls the message list (whole video is blurred)"},
+  {"t": "00:21.8", "action": "scrolls upward: an attachment with a green dot moves down the view"},
+  {"t": "00:25.4", "action": "scrolls back down past a wide green-striped attachment, a small pink-topped card and a yellow-striped card"},
+  {"t": "00:28.1", "action": "scrolls upward again over the same attachments"}
+ ],
+ "actual": "The list repeatedly scrolls up and down over the same attachments (the same yellow-striped card, pink-topped card and wide green-striped image reappear at 00:22.1-00:25.5, 00:25.8-00:28.3 and 00:28.4-00:30.9; the dark grid image seen at 00:07.8-00:10.0 reappears at 00:15.2). Some upward moves are discontinuous: at 00:22.0 -> 00:22.1 the whole view switches from the green-dot card to the yellow-striped card, and at 00:22.4 -> 00:22.5 from the yellow-striped card straight to the green-striped image, without the pink-topped card that lies between them when scrolling at 00:28.4-00:28.9.",
+ "decisive": "00:22.4 -> 00:22.5: scrolling up, the view jumps from the yellow-striped card to the green-striped image in one frame, skipping the pink-topped card that sits between them (seen there at 00:28.4-00:28.9)",
+ "not_visible": ["message text, authors and timestamps (the video is blurred), so missing messages cannot be confirmed", "whether the jumps are caused by loading older messages or by fast wheel scrolling", "Mattermost version, server, channel size"],
+ "notes": "Entire recording is deliberately blurred (privacy); only attachment thumbnails and layout are recognisable. Scroll direction and jumps inferred from thumbnail motion at 10 fps. Treat any claim about skipped messages as inferred, not read."
+}

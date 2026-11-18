@@ -1,0 +1,18 @@
+{
+ "recording": "recording.mp4",
+ "reviewer": "claude, from frames and the issue text",
+ "control": false,
+ "shows_bug": "partly",
+ "steps": [
+  {"t": "00:00.0", "action": "two Joplin DEV windows side by side: left light theme (profile /Users/self/.config/joplindev-desktop/profile-x72f4606), right dark theme (/home/self/.config/joplindev-desktop); both show a shared notebook 'test' (share icon, 2) with notes 'test' and 'Test'"},
+  {"t": "00:02.5", "action": "right window: right-clicks note 'test' > 'Publish note...' (04.0)"},
+  {"t": "00:04.6", "action": "'Publish Notes' dialog lists 'test' with no icon; clicks 'Copy Shareable Link' (06.0): 'Link has been copied to clipboard!' and a share icon button appears at the right of the 'test' row (06.6); Close (07.2)"},
+  {"t": "00:17.0", "action": "left window: right-clicks 'test' > 'Publish note...'; dialog (18.5) lists 'test' with no icon; clicks Copy Shareable Link (19.6): link copied, still no icon; Close (20.0)"},
+  {"t": "00:21.5", "action": "left window: opens Publish note for 'test' again (23.0-25.0): no icon; then for note 'Test' (28.0): Copy Shareable Link (29.0) -> share icon appears next to 'Test' (29.2); Close (31.6)"},
+  {"t": "00:35.0", "action": "right window: right-clicks 'Test' > 'Publish note...' (36.5-39.6): 'Test' listed with no icon; again at 41.5: Copy Shareable Link -> 'Synchronizing...' (42.6) -> 'Link has been copied' (43.6), no icon; again at 47-50.2: no icon; Close"}
+ ],
+ "actual": "The share icon button next to a published note appears only in the window that published it: 'test' published in the right window shows the icon there (06.6) but not in the left window (18.5-25.0); 'Test' published in the left window shows the icon there (29.2-31.6) but not in the right window (37.5-50.2), even after copying its link (43.6). So each user's Publish Notes dialog lacks the per-note control for notes the other user published. No one actually attempts to click an unpublish control.",
+ "decisive": "00:29.2 left window shows 'Test' with the share icon button; 00:43.6 right window shows the same 'Test' with 'Link has been copied to clipboard!' but no icon",
+ "not_visible": ["that the share icon is the unpublish button (implied, never clicked or tooltipped)", "who owns the share and who is the recipient", "the folder share/accept steps", "the expected rule that the owner can unpublish recipients' notes"],
+ "notes": "3024x1866 capture with two small windows; dialog contents only readable from full-res crops. The repro is about a missing control, inferred by comparison between the two windows; there is no explicit error. Some reopenings of the dialog repeat the same state."
+}

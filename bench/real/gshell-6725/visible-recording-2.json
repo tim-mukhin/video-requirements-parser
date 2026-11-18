@@ -1,0 +1,21 @@
+{
+  "recording": "recording-2.webm",
+  "reviewer": "claude, from frames and the issue text",
+  "control": false,
+  "shows_bug": "yes",
+  "steps": [
+    {"t": "00:00.8", "action": "opens the GNOME Shell overview (empty desktop before)"},
+    {"t": "00:01.1", "action": "types 'c'; results: Celluloid (highlighted), Calculator, Calendar, Code - OSS, Connections, PulseAudio..."},
+    {"t": "00:02.08", "action": "types 'ca', then 'cal' (00:02.15); results still show the 'c' list with Celluloid highlighted until 00:02.2"},
+    {"t": "00:02.22", "action": "result list updates for 'cal': Calculator, Calendar, Planner, LibreOffice Excel, Cheese, Inkscape; Calculator is highlighted at 00:02.34-00:02.40"},
+    {"t": "00:02.46", "action": "the overview closes (Enter presumably pressed; the key itself is not visible)"}
+  ],
+  "actual": "Right before the overview closes, the search field reads 'cal' and the highlighted first result is Calculator (00:02.34-00:02.40). The window that opens at 00:02.76 has the title 'Celluloid' and stays open to the end (00:06.4). Celluloid was the highlighted result for 'c' a moment earlier.",
+  "decisive": "00:02.40: 'cal' typed with Calculator highlighted -> 00:02.76: a window titled 'Celluloid' opens",
+  "not_visible": [
+    "the Enter key press (inferred from the overview closing)",
+    "that the user meant to type 'calc' - the field shows 'cal' when the overview closes",
+    "GNOME Shell version and distribution"
+  ],
+  "notes": "3840x2160, 6.4 s, variable frame rate; the whole event takes about 1.5 s, so it was checked on full-resolution frames. The Celluloid window is a mostly black player window with a light title bar."
+}

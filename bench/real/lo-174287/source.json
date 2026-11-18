@@ -1,0 +1,17 @@
+{
+  "id": "lo-174287",
+  "url": "https://bugs.documentfoundation.org/show_bug.cgi?id=174287",
+  "media_url": "https://bugs.documentfoundation.org/attachment.cgi?id=209561",
+  "files": [
+    "recording.mp4"
+  ],
+  "licence": "Attachment in a public bug tracker (bugs.documentfoundation.org); no explicit licence on the media. Public; fine for private internal testing, do not redistribute.",
+  "platform": "desktop (LibreOffice Writer 26.2 on Fedora 44, GNOME Wayland)",
+  "duration_s": 46.7,
+  "resolution": "1366x768",
+  "speech": "none (no audio track)",
+  "description": "Writer's Insert, Format and Styles menus sometimes do not open or open briefly and close by themselves.",
+  "expected_report": "In an empty Writer document the user clicks Insert, Format and Styles in the menu bar. Expected: the clicked menu stays open. Actual: those menus fail to open or flash open and close immediately, while other menus (Edit, File) open normally. Reproduces in safe mode and with a reset profile.",
+  "difficulty": "The bug is an absence or a sub-second flash of a menu; dark theme UI chrome; a screen-recorder timer in the top bar; working menus act as a control.",
+  "long": false
+}

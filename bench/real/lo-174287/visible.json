@@ -1,0 +1,17 @@
+{
+ "recording": "recording.mp4",
+ "reviewer": "claude, from frames and the issue text",
+ "control": false,
+ "shows_bug": "yes",
+ "steps": [
+  {"t": "00:00.0", "action": "empty 'Untitled 1 - LibreOffice Writer' document, dark theme"},
+  {"t": "00:03.9", "action": "opens the Edit menu (dropdown 00:03.9-00:04.6)"},
+  {"t": "00:06.5", "action": "goes along the menu bar one menu at a time: View (00:06.5), Insert (00:08.5), Format (00:09.6), Styles (00:11.0), Table (00:12.2), Form (00:14.0), Window (00:17.8), Help (00:19.6)"},
+  {"t": "00:23.1", "action": "keyboard access: mnemonics underlined, Format menu opened from the keyboard (00:24.8-00:26.8)"},
+  {"t": "00:33.1", "action": "opens File, later opens Form and slides across the menu bar with a menu open (00:37.5-00:41.2), ending on File (00:41.2-00:44.5)"}
+ ],
+ "actual": "On the first pass View (00:06.52), Insert (00:08.47), Format (00:09.58) and Styles (00:11.00) only get a blue highlight for a single frame and no dropdown appears; Edit (00:03.9), Table (00:12.28), Form (00:13.95) and Window (00:17.77) do show their dropdowns. Format opened from the keyboard at 00:24.8 stays open about 2 s. When moving across the bar with a menu already open (00:39.0-00:40.5), Styles, Format, Insert and View dropdowns do appear.",
+ "decisive": "00:09.58: the Format label lights up with no dropdown and is plain again at the next frame, while Table at 00:12.28 opens its dropdown normally",
+ "not_visible": ["the mouse pointer and clicks (no cursor in the capture), so it is not visible whether a menu was clicked or only hovered", "safe mode / reset profile", "LibreOffice version"],
+ "notes": "1366x768, variable ~5 fps; a menu that flashes shorter than one frame would be missed entirely. View also fails on the first pass although the issue names only Insert, Format and Styles. Clicks inferred only from label highlights."
+}

@@ -1,0 +1,23 @@
+{
+  "id": "kde-528737",
+  "url": "https://bugs.kde.org/show_bug.cgi?id=528737",
+  "kind": "bugzilla",
+  "licence": "public bug tracker attachment (no explicit licence); private testing only",
+  "long": false,
+  "platform": "desktop (Dolphin 27.03 on KDE Plasma 6.8, Wayland)",
+  "files": [
+    {
+      "file": "recording.mp4",
+      "source": "https://bugs.kde.org/attachment.cgi?id=198391",
+      "origin": "attachment 198391 '2026-11-11 22-56-29.mp4' by <email>",
+      "duration_s": 20.1,
+      "resolution": "1920x1080",
+      "has_audio_track": true,
+      "speech": "none (silent audio track)"
+    }
+  ],
+  "bug_in": "the only recording",
+  "description": "Columns view: a file with a very long name is not truncated, so the column fills the screen and navigation behaves oddly.",
+  "expected_report": "In a folder with a ~200-character file name, clicking a subfolder in Columns view leaves the current column filling the window and the next column out of view; clicking another folder only scrolls the view; resizing the window truncates the name and fixes the layout. Expected: the truncated layout from the start.",
+  "difficulty": "Horizontal scrolling of columns, very long text, the resize changes everything."
+}

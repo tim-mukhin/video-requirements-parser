@@ -1,0 +1,23 @@
+{
+  "id": "nextcloud-56859",
+  "url": "https://github.com/nextcloud/server/issues/56859",
+  "kind": "github",
+  "licence": "GitHub issue attachment (user content, no explicit licence); private testing only",
+  "long": false,
+  "platform": "web (Nextcloud Files demo site)",
+  "files": [
+    {
+      "file": "recording.mp4",
+      "source": "https://github.com/user-attachments/assets/d1fe5766-b71d-42a3-b724-7e97ff4603f6",
+      "origin": "issue body by Summon528",
+      "duration_s": 9.9,
+      "resolution": "1720x1392",
+      "has_audio_track": true,
+      "speech": "none (silent audio track)"
+    }
+  ],
+  "bug_in": "the only recording",
+  "description": "'Search everywhere' shows no results for a 2-character query, while the inline search found results.",
+  "expected_report": "Searching 'ne' in Files shows results; clicking 'Search everywhere' (expecting more) shows an empty 'no results' page; typing more characters makes results appear. Expected: either results or a clear message that the term is too short.",
+  "difficulty": "Short (10 s), a page transition, the bug is an empty state."
+}

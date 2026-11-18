@@ -1,0 +1,19 @@
+{
+ "recording": "recording.mp4",
+ "reviewer": "claude, from frames and the issue text",
+ "control": false,
+ "shows_bug": "yes",
+ "steps": [
+  {"t": "00:00.5", "action": "Nautilus, folder Downloads/out-viola: right-clicks 'viola-page000.png' and picks 'Rename...' (01.5)"},
+  {"t": "00:01.8", "action": "'Rename File' popover opens with 'viola-page000.png'"},
+  {"t": "00:03.0", "action": "types '/' characters: name 'viola-page000///.png', message 'File names cannot contain \"/\"', Rename button disabled (03.2-04.5)"},
+  {"t": "00:04.8", "action": "popover closes without renaming (how it is dismissed is not visible); file name unchanged"},
+  {"t": "00:05.8", "action": "selects folder 'final', right-clicks it (09.5) and picks 'Rename...' (10.5)"},
+  {"t": "00:10.8", "action": "'Rename Folder' popover opens with name 'final' and already shows 'File names cannot contain \"/\"' with Rename disabled (10.8-14.5)"},
+  {"t": "00:14.2", "action": "types a space after 'final': message disappears, Rename enabled (14.8); popover closes (16.2), folder still 'final'"}
+ ],
+ "actual": "After the '/' warning in the file rename popover (03.2-04.5) and closing it, a fresh rename of a different item (folder 'final', whose name has no '/') opens with the stale warning 'File names cannot contain \"/\"' and a disabled Rename button (10.8-14.5). The warning clears only after the user edits the text (14.8).",
+ "decisive": "00:10.8-00:14.5: 'Rename Folder' popover for 'final' shows 'File names cannot contain \"/\"' and a greyed Rename button although the name contains no '/'",
+ "not_visible": ["whether the first popover was closed by Escape or by clicking outside (no cursor or key overlay)", "Nautilus version"],
+ "notes": "Cropped capture of the Nautilus window; mouse cursor not visible in most frames, so clicks are inferred from menu highlights."
+}

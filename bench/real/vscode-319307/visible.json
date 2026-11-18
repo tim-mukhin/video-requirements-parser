@@ -1,0 +1,18 @@
+{
+ "recording": "recording.mp4",
+ "reviewer": "claude, from frames and the issue text",
+ "control": false,
+ "shows_bug": "yes",
+ "steps": [
+  {"t": "00:00.0", "action": "VS Code Agents/Sessions window: sessions list (nope, Farewell message, User greeting), two chat views side by side: 'Farewell message' (left, ~x310-1105) and 'User greeting' (right, ~x1105-1910), Changes panel on the far right"},
+  {"t": "00:01.2", "action": "starts dragging the 'Farewell message' view by its title; a 'Farewell message' drag label follows the cursor"},
+  {"t": "00:01.5", "action": "drop highlight covers the left half of its own view (01.5-01.8), then the right half of its own view (02.2-02.5)"},
+  {"t": "00:03.0", "action": "moves right: highlight covers the left half of 'User greeting' (03.0), then the right half of 'User greeting' (03.2-03.8); moves back and forth (04.0-05.5) through the same half-view highlights"},
+  {"t": "00:05.6", "action": "releases while the highlight covers the right half of 'User greeting' (~x1500-1910)"},
+  {"t": "00:05.8", "action": "result: views swapped - 'User greeting' now fills the whole left slot, 'Farewell message' fills the whole right slot (~x1105-1910); no third split"}
+ ],
+ "actual": "While dragging the 'Farewell message' chat view, every drop preview is a half-width box (left/right half of its own view, left/right half of the neighbour). Releasing on the right-half preview of 'User greeting' does not produce a half-width view: the two views simply swap and 'Farewell message' takes the full width of the right slot.",
+ "decisive": "00:05.5 drop preview covers only the right half of 'User greeting'; 00:05.8 after release 'Farewell message' occupies the entire right slot and 'User greeting' moved to the left",
+ "not_visible": ["a single highlight spanning half of its own view plus half of the neighbour at once (the previews seen are each one half-view box)", "VS Code / Insiders version"],
+ "notes": "2264x914 at 60 fps; text read from full-res crops, drag sequence checked at 15 fps around the drop (04.6-05.9). The issue words the preview as 'half of its own view and half of the sibling'; in the frames it shows as alternating half-view boxes over the own view and over the sibling."
+}

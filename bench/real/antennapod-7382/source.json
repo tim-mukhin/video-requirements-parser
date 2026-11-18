@@ -1,0 +1,23 @@
+{
+  "id": "antennapod-7382",
+  "url": "https://github.com/AntennaPod/AntennaPod/issues/7382",
+  "kind": "github",
+  "licence": "GitHub issue attachment (user content, no explicit licence); private testing only",
+  "long": false,
+  "platform": "phone (AntennaPod 3.4.1, Android 14, Galaxy S23)",
+  "files": [
+    {
+      "file": "recording.mp4",
+      "source": "https://github.com/user-attachments/assets/c0587079-2183-4a4f-9204-5070dbb4a6cd",
+      "origin": "issue body by sabrinaayoubcharette",
+      "duration_s": 30.7,
+      "resolution": "1080x2340",
+      "has_audio_track": true,
+      "speech": "no narration; the played podcast (English) and room noise are audible, the bug is in the audio"
+    }
+  ],
+  "bug_in": "the only recording",
+  "description": "Podcast playback randomly skips forward; rewinding reproduces the skip at the same place.",
+  "expected_report": "While a podcast plays, at around 42:23 in the episode the audio jumps ahead and part of the content is skipped; seeking back reproduces the same skip. Expected: continuous playback. The reporter apologises for background noise.",
+  "difficulty": "The bug is audible rather than visible (podcast audio plus room noise), the clue is the playback position."
+}

@@ -1,0 +1,27 @@
+{
+  "id": "newpipe-14015",
+  "url": "https://github.com/TeamNewPipe/NewPipe/issues/14015",
+  "media_url": [
+    "https://github.com/user-attachments/assets/c36bf07c-8c35-460a-962b-baf55b96adba",
+    "https://github.com/user-attachments/assets/6b471069-daf4-4ab8-9048-c2bffa2f20ec",
+    "https://github.com/user-attachments/assets/da7ffe5f-a765-451f-bcbc-6f2598f00c31"
+  ],
+  "files": [
+    "recording.mp4",
+    "recording-2.mp4",
+    "recording-3.mp4"
+  ],
+  "licence": "GitHub issue attachment: user-uploaded content under GitHub Terms of Service; the project code licence does not automatically cover it. Public; fine for private internal testing, do not redistribute.",
+  "platform": "phone (NewPipe 0.29.2, Android 8, Samsung Galaxy S7)",
+  "duration_s": [
+    23.9,
+    27.4,
+    31.9
+  ],
+  "resolution": "240x426 (very low)",
+  "speech": "no narration; audio is from the played videos (Vietnamese)",
+  "description": "YouTube Kids videos cannot be played in NewPipe ('Content unavailable' / Guru Meditation error); the issue text has no steps, everything is in the three recordings.",
+  "expected_report": "The user opens a video from the YouTube app (or NewPipe feed) and sends it to NewPipe's video player. A regular video plays. A kids video (cartoon channels such as Oggy, Doraemon, Lotty Friends) fails: NewPipe shows an error page 'Có vẻ NewPipe đã xảy ra lỗi' with 'Nội dung không khả dụng' (content unavailable), requested stream URL, NewPipe 0.29.2, Android 8.0, and a stack trace from org.schabi.newpipe.extractor; then the 'content unavailable' screen with Report / Retry / Open in browser buttons. Expected: kids videos play like others (a comment says it worked in extractor 0.26.1).",
+  "difficulty": "240x426 resolution, Vietnamese UI, 'Recorded by Mobizen' watermark and a floating recorder bubble over the content, the first recording shows the working case, the error details are tiny text.",
+  "long": false
+}

@@ -1,0 +1,26 @@
+{
+  "recording": "recording.mp4",
+  "reviewer": "claude, from frames and the issue text",
+  "control": false,
+  "shows_bug": "yes",
+  "steps": [
+    {"t": "00:00.0", "action": "Thunderbird for Android Inbox (<email>) with Test message 13...6"},
+    {"t": "00:03.0", "action": "taps Test message 13 (touch dot visible), message view opens at 00:03.5, content at 00:04.2"},
+    {"t": "00:05.6", "action": "taps the trash icon in the message toolbar (ripple on the icon), body goes blank at 00:05.9"},
+    {"t": "00:07.3", "action": "Test message 12 is shown in the message view"},
+    {"t": "00:07.8", "action": "without a visible tap, the Inbox slides in from the left over Test message 12 and the app is back on the message list by 00:08.1"},
+    {"t": "00:08.0", "action": "Inbox list is empty until 00:09.0, then a blurred (redacted) message list appears at 00:09.2"},
+    {"t": "00:11.0", "action": "opens the drawer, then Settings > Account settings > Reading mail ('Mark as read when opened' checked) at 00:17.0"},
+    {"t": "00:28.0", "action": "Reading mail again, then Folders, then back"},
+    {"t": "00:40.8", "action": "General settings > Interaction: 'After deleting or moving a message: Show next message'"},
+    {"t": "00:53.5", "action": "recording ends on the Android notification shade"}
+  ],
+  "actual": "After deleting Test message 13 the next message (Test message 12) appears for about 0.5 s, then the app navigates back to the Inbox list on its own.",
+  "decisive": "00:07.3-00:07.7 Test message 12 is shown after delete, 00:07.8 the Inbox slides in with no tap and stays; 00:40.8 Interaction shows 'After deleting or moving a message: Show next message'.",
+  "not_visible": [
+    "archive: only one delete is performed, no archive",
+    "the intermittency (about half the time): only one attempt is recorded",
+    "whether Test message 12 got marked as read: the list after returning is blurred/redacted and does not show the test messages"
+  ],
+  "notes": "The setting precondition is visible in the recording (00:40.8), not hidden. Android 'show taps' dots are visible for taps at 00:03.0 and on the trash icon, and none at 00:07.8. The inbox content after 00:09.2 is blurred by the reporter, so the result state of the list is unreadable."
+}

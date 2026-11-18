@@ -1,0 +1,18 @@
+{
+ "recording": "recording-2.mp4",
+ "reviewer": "claude, from frames and the issue text",
+ "control": false,
+ "shows_bug": "yes",
+ "steps": [
+  {"t": "00:02.4", "action": "in the YouTube app (Vietnamese UI) taps search and types 'oggy'"},
+  {"t": "00:04.5", "action": "submits the search; results show Oggy cartoon videos ('Oggy và những chú gián tinh nghịch...', 'Oggy and the Cockroaches - Oggy Starts Painting!')"},
+  {"t": "00:07.8", "action": "opens a result's menu and taps 'Chia sẻ' (Share)"},
+  {"t": "00:11.8", "action": "in the Android share sheet picks NewPipe"},
+  {"t": "00:14.2", "action": "in NewPipe's dialog chooses 'Trình phát video' (video player), 'Chỉ một lần'"},
+  {"t": "00:19.8", "action": "after the error screen appears, scrolls through the error report, then goes back"}
+ ],
+ "actual": "NewPipe opens (splash 00:15.8-00:16.2, spinner 00:16.5-00:16.8) and at 00:17.2 shows the sad face with 'Nội dung không khả dụng' (content unavailable) and buttons Báo cáo / Thử lại / Mở trong trình duyệt. At 00:19.8-00:24.5 the 'Báo lỗi' report reads 'Có vẻ NewPipe đã xảy ra lỗi... Guru Meditation', type 'requested stream', region VN, version 0.29.2, Linux Android 8.0.0, and a stack trace with ContentNotAvailableException ... 'Got error UNPLAYABLE: \"This video is not available\"'. Back to the content-unavailable screen at 00:25.0 until the end.",
+ "decisive": "00:17.2: NewPipe shows 'Nội dung không khả dụng' for the Oggy video shared from YouTube; the report at 00:21.2 shows 'UNPLAYABLE: This video is not available'",
+ "not_visible": ["that the video is a YouTube Kids / made-for-kids video (only that it is an Oggy cartoon)", "a regular video playing for comparison (not in this recording)", "which exact result's menu was opened (the overlay hides it)"],
+ "notes": "Phone recording with a 'Recorded by' watermark and a floating recorder bubble; UI in Vietnamese. Stack trace text is small but readable when zoomed."
+}

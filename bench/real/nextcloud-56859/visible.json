@@ -1,0 +1,16 @@
+{
+ "recording": "recording.mp4",
+ "reviewer": "claude, from frames and the issue text",
+ "control": false,
+ "shows_bug": "yes",
+ "steps": [
+  {"t": "00:01.0", "action": "types 'n' then 'ne' into the Files sidebar search field (demo1.nextcloud.com)"},
+  {"t": "00:01.5", "action": "the file list filters inline to 4 files and a 'Search everywhere' button appears"},
+  {"t": "00:03.5", "action": "clicks 'Search everywhere'"},
+  {"t": "00:06.8", "action": "clicks the 'Search for files' field on the empty page and types one more character ('nex')"}
+ ],
+ "actual": "With 'ne' the inline filter shows 4 matching files (Nextcloud.png, Nextcloud intro.mp4, Nextcloud Manual.pdf, Reasons to use Nextcloud.pdf) at 00:01.5-00:03.8. After clicking 'Search everywhere' the Search view is blank at 00:04.0 and then shows 'No search results for \"ne\"' from 00:04.5 to 00:07.5. After typing 'nex' a spinner appears at 00:07.8 and at 00:08.0 the Search view lists 7 files.",
+ "decisive": "00:04.5: 'No search results for \"ne\"' right after the inline filter had shown 4 matches for the same 'ne'",
+ "not_visible": ["any message that the term is too short (none is shown)", "server version / search settings"],
+ "notes": "Clear recording, small UI text but readable when zoomed."
+}

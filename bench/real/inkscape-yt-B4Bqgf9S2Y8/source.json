@@ -1,0 +1,25 @@
+{
+ "id": "inkscape-yt-B4Bqgf9S2Y8",
+ "url": "https://www.youtube.com/watch?v=B4Bqgf9S2Y8",
+ "kind": "youtube",
+ "licence": "YouTube CC BY",
+ "long": false,
+ "platform": "desktop (Inkscape development build, Linux) mixed with talking head",
+ "files": [
+  {
+   "file": "recording.mp4",
+   "source": "https://www.youtube.com/watch?v=B4Bqgf9S2Y8",
+   "origin": "YouTube",
+   "duration_s": 466.1,
+   "resolution": "1280x720",
+   "has_audio_track": true,
+   "ext": "mp4",
+   "speech": "speech (en), checked on a 2-min sample from 0 s"
+  }
+ ],
+ "bug_in": "the only recording",
+ "description": "Inkscape developer's vlog: reproducing and fixing release-freeze bugs (stroke to path bounding boxes, filter areas, eraser with the Layers dialog open).",
+ "expected_report": "Several bugs, each shown then fixed: wrong bounding box after Stroke to Path, filter area problems, eraser misbehaving while the Layers dialog is open. A good report lists each bug with its repro as shown and notes which ones the developer says are fixed.",
+ "difficulty": "Not a bug report but a dev vlog: mix of camera and screen, code editor, several bugs in one video, 7.8 min.",
+ "not_repro": "an edited video about bugs (vlog or explainer), not a recording of one bug repro; left out of the bug set"
+}

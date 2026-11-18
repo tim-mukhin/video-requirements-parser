@@ -1,0 +1,24 @@
+{
+  "recording": "recording.mp4",
+  "reviewer": "claude, from frames and the issue text",
+  "control": false,
+  "shows_bug": "yes",
+  "steps": [
+    {"t": "00:00.0", "action": "Rocket.Chat web (open.rocket.chat/channel/sandbox) on Windows, emoji picker open in the composer"},
+    {"t": "00:01.0", "action": "hovering emojis, the white name tooltip shows next to the hovered emoji (:grinning:, :upside_down:, :melting_face:, :kissing_heart:, :zany_face: ...)"},
+    {"t": "00:20.5", "action": "switches to the hand-gestures section, :palm_down_hand: tooltip next to the emoji"},
+    {"t": "00:22.2", "action": "clicks the Notepad icon in the taskbar, Notepad opens on top of the right half of the page"},
+    {"t": "00:24.0", "action": "moves the pointer back over the picker without clicking the browser"},
+    {"t": "00:27.25", "action": "hovering :eye_in_speech_bubble:, its white tooltip appears at the page top-left corner (over the 'Enter your E2E password' banner), only a small native title tooltip is next to the emoji"},
+    {"t": "00:30.88", "action": "hovering :speech_left:, tooltip again at the page top-left corner"},
+    {"t": "00:37.2", "action": "hovering :zzz:, tooltip shows next to the emoji"},
+    {"t": "00:45.5", "action": "recording ends with Notepad still open"}
+  ],
+  "actual": "Before focusing another app the tooltips sit next to hovered emojis. After clicking Notepad and returning the pointer without clicking, tooltips for some emojis render at the page's top-left corner, from about 00:27 to 00:31.",
+  "decisive": "00:27.25-00:30.6 ':eye_in_speech_bubble:' tooltip at the page top-left corner while the pointer is on that emoji in the picker; 00:30.88 same for ':speech_left:'.",
+  "not_visible": [
+    "whether the browser window lost focus is only inferred from Notepad being opened and on top",
+    "which tooltips are misplaced vs correct follows no visible rule (:zzz: at 00:37.2 is placed correctly)"
+  ],
+  "notes": "At 00:25.5 and 00:26.8 :white_heart: and :speech_balloon: tooltips appear at the left edge of the picker, not next to the emoji; also a misplacement but not the top-left corner. At 00:01.8 one tooltip also briefly appears left of the picker before Notepad, unconfirmed at this zoom."
+}

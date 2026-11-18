@@ -1,0 +1,23 @@
+{
+  "id": "element-30123",
+  "url": "https://github.com/element-hq/element-web/issues/30123",
+  "kind": "github",
+  "licence": "GitHub issue attachment (user content, no explicit licence); private testing only",
+  "long": false,
+  "platform": "web (app.element.io on macOS)",
+  "files": [
+    {
+      "file": "recording.gif",
+      "source": "https://github.com/user-attachments/assets/28d073f4-292c-4b23-891b-a721247c90ae",
+      "origin": "issue body by mxandreas",
+      "duration_s": 29.8,
+      "resolution": "2710x1838",
+      "has_audio_track": false,
+      "speech": "none (no audio track)"
+    }
+  ],
+  "bug_in": "the only recording",
+  "description": "Pressing 'Finish the setup' several times at the end of recovery setup opens recovery-key dialogs and error modals repeatedly.",
+  "expected_report": "Settings > Encryption > Set up recovery, at the last step the user clicks 'Finish the setup' several times because finishing takes seconds. Modals asking for the recovery key and error messages pop up several times. Expected: the button is disabled while finishing, repeated clicks are ignored. Fixed later in element-web PR 30664.",
+  "difficulty": "GIF without audio, fast repeated clicks, stacked modals."
+}

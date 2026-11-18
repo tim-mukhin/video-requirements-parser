@@ -1,0 +1,21 @@
+{
+  "recording": "recording.mp4",
+  "reviewer": "claude, from frames and the issue text",
+  "control": false,
+  "shows_bug": "yes",
+  "steps": [
+    {"t": "00:00.0", "action": "Android tablet: XRecorder screen recorder starts, the user switches to Krita through the recent-apps view (00:00.5-00:02.2)"},
+    {"t": "00:02.5", "action": "Krita: a comic page with panel frames; the top-right panel is selected with transform handles"},
+    {"t": "00:05.0", "action": "zooms the canvas in on the selected panel"},
+    {"t": "00:07.5", "action": "drags the left-edge middle handle of the selected panel left and right, repeatedly, until about 00:19.8"},
+    {"t": "00:24.0", "action": "a 'Stop sharing screen?' system dialog appears over Krita; the clip ends at 00:25.2"}
+  ],
+  "actual": "While the left-edge handle is dragged, the drawn edge of the panel does not follow the handle's dashed outline: at 00:07.75 the edge sits left of the dashed handle line, at 00:12.5 clearly right of it, at 00:15.25 far to the left of it (most of the way to the neighbouring panel), at 00:16.5 right of it again. Between frames the edge jumps between positions rather than moving smoothly with the handle, and the gap is larger at the larger stretches.",
+  "decisive": "00:15.25: the dashed handle line of the left edge is well inside the panel while the drawn left edge has jumped far to the left of it",
+  "not_visible": [
+    "that all snapping options are off - no snapping settings are shown",
+    "which tool is active (the toolbox is visible but the selected tool is too small to confirm)",
+    "the finger or stylus - touch input has no cursor; drags are inferred from handle motion"
+  ],
+  "notes": "1088x720, about 25 s; the first 2.5 s are app switching and the last 1.5 s a screen-recorder dialog. The effect is a small offset between a dashed handle line and a solid edge; checked on full-resolution crops. 4 fps sampling cannot tell whether the edge moves in discrete steps or just lags."
+}

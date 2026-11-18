@@ -1,0 +1,16 @@
+{
+ "recording": "recording.mp4",
+ "reviewer": "claude, from frames and the issue text",
+ "control": false,
+ "shows_bug": "yes",
+ "steps": [
+  {"t": "00:01.5", "action": "test page 'Fancy Range Slider' (shape 'curve', value tooltip above the thumb): grabs the thumb at 20"},
+  {"t": "00:02.0", "action": "drags the thumb left to 0 and then right to 100 along the curve"},
+  {"t": "00:04.0", "action": "keeps dragging back and forth"},
+  {"t": "00:06.5", "action": "switches the shape to wave (00:06.8), zig-zag (00:12.5), bell (00:18.0), diagonal (00:23.3), arc (00:26.3), random (00:33.5) and drags on each; toggles 'Keep the tooltip straight' on at ~00:15.3 and off at ~00:29.7"}
+ ],
+ "actual": "While dragging, the thumb circle vanishes for stretches although the value tooltip keeps updating: on the curve shape the thumb is drawn up to 66 (00:03.10), is missing from 00:03.13 to 00:03.63 while the value goes 70 -> 100 under the moving cursor, and reappears at 00:03.67. Similar gaps occur on other shapes mostly at high values on the right side (e.g. around 94-100 at 00:09.3-00:10.3 on wave).",
+ "decisive": "00:03.13-00:03.63: dragging toward 100 the thumb is not drawn at all while the tooltip shows 70...100; it is back at 00:03.67",
+ "not_visible": ["that the tooltip is required to trigger the flicker (no run without the tooltip)", "Firefox version / platform"],
+ "notes": "Small 488x454 capture at 30 fps; the flicker is clear only frame-by-frame (>=15 fps). Cursor is small but visible."
+}

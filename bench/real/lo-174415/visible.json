@@ -1,0 +1,22 @@
+{
+ "recording": "recording.mp4",
+ "reviewer": "claude, from frames and the issue text",
+ "control": false,
+ "shows_bug": "yes",
+ "steps": [
+  {"t": "00:01.0", "action": "LibreOffice Calc with a Date/Region/Salesperson/Product/Sales/Cost table; selects it and opens Pivot Table (menu 02.0, Select Source 'Current selection' 03.0, OK)"},
+  {"t": "00:04.0", "action": "Pivot Table Layout: 'Data' in Column Fields, Data Fields empty; drags 'Data' toward Row Fields several times (04.5-11.0): it stays in Column Fields"},
+  {"t": "00:12.0", "action": "drags 'Data' to Available Fields: it disappears from Column Fields (12.5); clicks OK (14.0)"},
+  {"t": "00:16.5", "action": "starts again: Select Source, OK (18.0); layout shows 'Data' in Column Fields (18.5)"},
+  {"t": "00:19.5", "action": "drags 'Data' to Row Fields: a no-drop cursor shows at 20.0, 'Data' remains in Column Fields (20.5-21.5)"},
+  {"t": "00:22.0", "action": "builds the layout: Salesperson to Filters (25.0), Region to Row Fields (27.5), Sales and Cost to Data Fields ('Sum - Sales', 'Sum - Cost', 30.0-31.5)"},
+  {"t": "00:33.0", "action": "drags 'Data' from Column Fields again (33.0-34.5): no change; clicks OK (35.0)"},
+  {"t": "00:36.0", "action": "pivot on the sheet: Region rows, 'Data' as column header with Sum - Sales and Sum - Cost side by side"},
+  {"t": "00:45.0", "action": "on the sheet drags the 'Data' header cell (B3) down onto the Region area (A6, 48.0): pivot changes to Data in rows, Sum - Sales and Sum - Cost stacked (49.0)"},
+  {"t": "00:53.5", "action": "reopens Pivot Table Layout: 'Data' now in Row Fields above Region; drags 'Data' to Column Fields (55.5-58.5): no-drop cursor, it stays in Row Fields; OK (60.5)"}
+ ],
+ "actual": "Inside the Pivot Table Layout dialog the 'Data' field cannot be moved between Column Fields and Row Fields in either direction: drags at 04.5-11.0, 19.5-21.5 and 33.0-34.5 leave it in Column Fields (no-drop cursor at 20.0), and after it is placed in rows via the sheet, dragging it back to Column Fields at 55.5-58.5 also fails. No message is shown. Dragging the 'Data' header directly on the sheet (45-49) does move the data values into rows. Other fields (Salesperson, Region, Sales, Cost) drag normally.",
+ "decisive": "00:20.0: dragging 'Data' over Row Fields shows a no-drop cursor and 'Data' stays in Column Fields, while Region drags into Row Fields fine at 00:27.5",
+ "not_visible": ["the Ctrl key held during the sheet drag (only the drag itself is visible)", "LibreOffice version"],
+ "notes": "1920x1080, dialog text small but readable at full res; the recorder draws orange circles at clicks, which helps. The first pass (04-14) starts with Data Fields empty, so the 'Sales and Cost as data fields' condition holds only from 31.5 on."
+}

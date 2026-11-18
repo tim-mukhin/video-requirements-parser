@@ -1,0 +1,17 @@
+{
+  "id": "firefox-2092548",
+  "url": "https://bugzilla.mozilla.org/show_bug.cgi?id=2092548",
+  "media_url": "https://bugzilla.mozilla.org/attachment.cgi?id=9682538",
+  "files": [
+    "recording.mp4"
+  ],
+  "licence": "Attachment in a public bug tracker (bugzilla.mozilla.org); no explicit licence on the media. Public; fine for private internal testing, do not redistribute.",
+  "platform": "desktop (Firefox 160 on Linux)",
+  "duration_s": 5.1,
+  "resolution": "1280x720 30fps",
+  "speech": "none (audio track is background noise only)",
+  "description": "Vertical tabs with 'expand sidebar on hover': the content area reflows for about one frame when the sidebar collapses.",
+  "expected_report": "With vertical tabs collapsed and expand-on-hover enabled, hovering the sidebar expands it over google.com; moving the cursor away collapses it. Expected: the sidebar overlays the page, the page width never changes. Actual: on collapse the page content briefly shifts to a different width for about one frame, then snaps back.",
+  "difficulty": "Five seconds long, the bug is a single-frame layout jump; nothing is said or highlighted; light page with dark browser chrome.",
+  "long": false
+}

@@ -1,0 +1,23 @@
+{
+  "id": "commons-blender-amd-normals",
+  "url": "https://commons.wikimedia.org/wiki/File:Blender_2.9_AMD_normals_bug.webm",
+  "kind": "commons",
+  "licence": "CC BY-SA 4.0",
+  "long": false,
+  "platform": "desktop (Blender 2.9, Eevee viewport, AMD GPU)",
+  "files": [
+    {
+      "file": "recording.webm",
+      "source": "https://upload.wikimedia.org/wikipedia/commons/1/18/Blender_2.9_AMD_normals_bug.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "origin": "Wikimedia Commons file",
+      "duration_s": 52.3,
+      "resolution": "1280x720",
+      "has_audio_track": true,
+      "speech": "none (silent audio track)"
+    }
+  ],
+  "bug_in": "the only recording",
+  "description": "Shading/normals artefacts in Blender 2.9 after an AMD driver update (fixed in 2.91.2); occurs without High Quality Normals in Eevee.",
+  "expected_report": "In the Blender viewport a textured model renders with broken normals: visible faceted or corrupted shading artefacts that change as the view moves. Expected: correct smooth shading. Cause was AMD drivers; workaround High Quality Normals or older drivers.",
+  "difficulty": "3D viewport artefacts, dark Blender UI with small text, no narration, nothing points at the bug."
+}

@@ -1,0 +1,17 @@
+{
+ "recording": "recording.webm",
+ "reviewer": "claude, from frames and the issue text",
+ "control": false,
+ "shows_bug": "yes",
+ "steps": [
+  {"t": "00:00.2", "action": "Quick Settings menu open at the top-left (RTL-mirrored GNOME panel: system icons at the left), then the keyboard layout menu en1/en2 (00:00.8-01.2)"},
+  {"t": "00:01.5", "action": "Quick Settings open again"},
+  {"t": "00:02.7", "action": "clicks the VPN toggle (Proton VPN CA): toggle turns blue, a VPN icon appears in the top panel between the volume and Wi-Fi icons"},
+  {"t": "00:04.6", "action": "clicks VPN again (off); menu closes at 05.4, reopens at 05.8"},
+  {"t": "00:06.5", "action": "turns VPN on again; menu closes ~07.9 and reopens 08.4 until the end (09.5)"}
+ ],
+ "actual": "In the same frame the VPN icon appears in the panel (00:02.77) the whole open Quick Settings menu jumps about 14 px to the right (left edge from ~60 to ~74 px in the 609 px wide capture) and stays there while open; turning VPN off (04.6) does not move it back. On the second toggle (06.5) no jump is seen while the menu is open; the menu reopens at 08.4 in the shifted position.",
+ "decisive": "00:02.74 -> 00:02.77: VPN icon appears in the top panel and the open Quick Settings menu shifts right by ~14 px between two consecutive frames",
+ "not_visible": ["the RTL locale/language itself (UI text is English; RTL only inferred from the mirrored panel)", "GNOME Shell version"],
+ "notes": "Small 609x640 crop of the screen; the shift is small and is easy to miss on contact sheets, confirmed frame by frame. Behaviour on the second VPN toggle differs from the first."
+}

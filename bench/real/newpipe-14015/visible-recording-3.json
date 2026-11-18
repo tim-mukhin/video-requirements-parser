@@ -1,0 +1,23 @@
+{
+  "recording": "recording-3.mp4",
+  "reviewer": "claude, from frames and the issue text",
+  "control": false,
+  "shows_bug": "yes",
+  "steps": [
+    {"t": "00:00.0", "action": "NewPipe feed 'Có gì mới' (What's new) with videos: RACE BEYOND THE ROAD | OLD ASPHALT 8, Dining with Doraemon Series #218 (POPS Kids), Cops Hunt Down..., FINALLY A NATIVE PC PORT..."},
+    {"t": "00:04.2", "action": "taps 'Dining with Doraemon Series #218'"},
+    {"t": "00:07.5", "action": "opens the error report ('Báo lỗi') from the content-unavailable screen and scrolls through the stack trace (00:08.5-00:12.0)"},
+    {"t": "00:12.2", "action": "goes back to the content-unavailable screen, then to the feed (00:13.8)"},
+    {"t": "00:14.5", "action": "taps 'RACE BEYOND THE ROAD | OLD ASPHALT 8'; it loads and plays (Gameloft intro and gameplay, 00:16.8-00:21.8)"},
+    {"t": "00:22.0", "action": "back to the feed with the Asphalt video in the mini player; scrolls down"},
+    {"t": "00:25.0", "action": "taps 'Candyko's Quiz Adventure: Christmas | LOTTY FRIENDS' (POPS Kids)"}
+  ],
+  "actual": "The Doraemon video (POPS Kids channel) fails: a sad-face screen 'Nội dung không khả dụng' (content unavailable) with buttons BÁO CÁO / THỬ LẠI / MỞ TRONG TRÌNH DUYỆT (00:04.8-00:07.2). The error report reads 'Có vẻ NewPipe đã xảy ra lỗi... Guru Meditation', 'Nội dung không khả dụng', error type 'requested stream', service YouTube, app org.schabi.newpipe 0.29.2, OS Linux Android 8.0.0, and a stack trace starting 'org.schabi.newpipe.extractor.exceptions.Con...' (00:07.8). The Asphalt 8 video (Gyrus channel) plays normally (00:16.8-00:21.8). The Lotty Friends video shows the same 'Nội dung không khả dụng' screen (00:26.0 to the end); the player area above it keeps showing Asphalt gameplay footage.",
+  "decisive": "00:05.0: 'Nội dung không khả dụng' for 'Dining with Doraemon Series #218', while 'OLD ASPHALT 8' from the same feed plays at 00:16.8",
+  "not_visible": [
+    "that the failing videos are 'YouTube Kids' content - only the POPS Kids channel name hints at it",
+    "the claim that it worked with extractor 0.26.1",
+    "device model"
+  ],
+  "notes": "240x426, Vietnamese UI, 'Recorded by Mobizen' watermark and a floating recorder bubble cover parts of the screen; the stack trace is barely readable at 2x zoom. The Asphalt footage in the player area during the Lotty error (00:25.2-00:31.8) may be the mini player or a leftover frame; unclear."
+}

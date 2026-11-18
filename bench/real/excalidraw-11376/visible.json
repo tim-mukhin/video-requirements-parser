@@ -1,0 +1,20 @@
+{
+ "recording": "recording.mp4",
+ "reviewer": "claude, from frames and the issue text",
+ "control": false,
+ "shows_bug": "yes",
+ "steps": [
+  {"t": "00:01.8", "action": "clicks 'New Folder' in the 'Basics' collection (existing folders Classes, Constructor, Object)"},
+  {"t": "00:02.5", "action": "'Create a Folder' dialog opens with Name prefilled and selected: 'Constructor'"},
+  {"t": "00:04.2", "action": "clears the field (placeholder 'My new group' shows), types 'Try1' (06.8-09.2)"},
+  {"t": "00:10.2", "action": "clicks Create: folder 'Try1' appears in the list (10.8)"},
+  {"t": "00:12.2", "action": "clicks 'New Folder' again"},
+  {"t": "00:12.8", "action": "dialog opens with Name prefilled and selected: 'Try1'"},
+  {"t": "00:17.8", "action": "clicks Cancel; dialog closes (18.2), no new folder"},
+  {"t": "00:20.8", "action": "a screen-capture toolbar appears at the bottom (21.0-24.0), recording ends at 00:26.5"}
+ ],
+ "actual": "The New Folder dialog is not empty when opened: at 00:02.5 it already contains 'Constructor' (an existing folder name), and after creating 'Try1' the next open at 00:12.8 contains 'Try1'. The placeholder 'My new group' is only seen after the user clears the field (00:04.2).",
+ "decisive": "00:12.8-00:18.0: second 'Create a Folder' dialog shows Name = 'Try1' (selected), the name of the folder just created at 00:10.2",
+ "not_visible": ["app version / platform beyond the dark Excalidraw-like UI", "how 'Constructor' got into the field (an earlier creation outside the recording is implied but not shown)"],
+ "notes": "High-res (2566x1730) but the UI is small; dialog text read from full-res crops. The macOS screenshot toolbar at 00:21-00:24 is the recorder, not the app."
+}

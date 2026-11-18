@@ -1,0 +1,23 @@
+{
+  "id": "wmf-metrics-2016-08",
+  "url": "https://commons.wikimedia.org/wiki/File:WMF_Metrics_and_Activities_Meeting_-_August_2016.webm",
+  "kind": "commons",
+  "licence": "CC BY-SA 3.0",
+  "long": true,
+  "platform": "meeting recording (WMF monthly metrics meeting: slides, room and remote speakers)",
+  "files": [
+    {
+      "file": "recording.webm",
+      "source": "https://upload.wikimedia.org/wikipedia/commons/b/b9/WMF_Metrics_and_Activities_Meeting_-_August_2016.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "origin": "Wikimedia Commons file",
+      "duration_s": 3495.9,
+      "resolution": "1280x720",
+      "has_audio_track": true,
+      "speech": "speech (en), checked on a 2-min sample from 600 s"
+    }
+  ],
+  "bug_in": "the only recording",
+  "description": "Wikimedia Foundation Metrics and Activities Meeting, August 2016: several presenters with slides.",
+  "expected_report": "A slide timeline (which slide when, who presented it), key numbers stated on slides vs in speech, and Q&A. No bug report.",
+  "difficulty": "Long, many presenters, switches between slides and room camera."
+}

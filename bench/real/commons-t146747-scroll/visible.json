@@ -1,0 +1,17 @@
+{
+ "recording": "recording.webm",
+ "reviewer": "claude, from frames and the issue text",
+ "control": false,
+ "shows_bug": "yes",
+ "steps": [
+  {"t": "00:00.8", "action": "Wikipedia Android app (German), an article about retard formulations already scrolled to 'Zeitlicher Verlauf der Freisetzung'"},
+  {"t": "00:01.8", "action": "taps the link 'orale osmotische System'; a link preview card opens"},
+  {"t": "00:02.8", "action": "taps 'ARTIKEL LESEN'"},
+  {"t": "00:05.8", "action": "repeats the chain: link 'Hydromorphonhydrochlorid' -> ARTIKEL LESEN (00:06.8), 'Pentobarbital' (00:09.2 -> 00:10.5), 'Veterinärmedizin' (00:15.0), 'Hochschulen' (00:18.5), 'Technische Universität' (00:21.5), 'ETH Zürich' (00:24.5)"},
+  {"t": "00:27.0", "action": "scrolls the ETH Zürich article back up to its top (00:30.2), then goes back (00:31.8)"}
+ ],
+ "actual": "Each newly opened article shows its title/lead for a moment and then jumps down the page by itself: 'Orales osmotisches System' lead at 00:03.0-00:03.5, at 00:03.8 it is at 'Beispiele / Einzelnachweise'; 'Hydromorphon' lead at 00:07.2-00:07.5, at 00:07.8 at 'Sonstiges'; 'Pentobarbital' at 00:11.0, at 00:11.2 at 'Sicherheitshinweise / Verwendung'; 'Veterinärmedizin' at 00:16.5-00:16.8, at 00:17.0 at 'Berufsorganisationen'; 'Hochschule' at 00:19.8, at 00:20.0 at 'Künstlerische Hochschulen'; 'Technische Universität' at 00:23.0, at 00:23.2 at 'Österreich / Schweiz'; 'ETH Zürich' at 00:26.2, at 00:26.5 in the Hönggerberg section.",
+ "decisive": "00:03.5 -> 00:03.8: the new 'Orales osmotisches System' article, shown at its top, jumps without any touch to the 'Beispiele / Einzelnachweise' sections near its end",
+ "not_visible": ["the issue's claim that the offset relates to the previous article's scroll position cannot be checked from the frames", "app version / device"],
+ "notes": "Phone screen capture, clear and readable. No touch indicators; taps inferred from link highlight and preview cards. Some links are tapped while the page is still mid-scroll."
+}

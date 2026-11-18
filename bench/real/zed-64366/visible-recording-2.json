@@ -1,0 +1,16 @@
+{
+ "recording": "recording-2.mp4",
+ "reviewer": "claude, from frames and the issue text",
+ "control": true,
+ "shows_bug": "no",
+ "steps": [
+  {"t": "00:00.0", "action": "VS Code (WSL: Ubuntu, project jellyfin-web) in a short window; the Explorer context menu is open on .devcontainer"},
+  {"t": "00:02.2", "action": "right-clicks .github; menu opens down to the bottom of the window"},
+  {"t": "00:08.0", "action": "right-clicks cssnano.config.js near the bottom of the Explorer; the menu opens upward above the cursor"},
+  {"t": "00:10.0", "action": "repeats on CONTRIBUTING.md, .nvmrc, .npmrc, .npmignore and .editorconfig rows at different heights (00:11.0-00:25.0)"}
+ ],
+ "actual": "Every context menu stays fully inside the window: for rows near the bottom it is shifted up so 'Delete Permanently' (last item) is visible, e.g. at 00:08.0 the menu for cssnano.config.js spans from the top of the window down to just above the clicked row; at 00:16.0 and 00:19.0 the menu reaches the status bar with all items readable.",
+ "decisive": "00:08.0: right-click on the bottom row cssnano.config.js opens the menu upward, fully visible down to 'Delete Permanently'",
+ "not_visible": ["Zed itself (this recording is VS Code, the comparison app)"],
+ "notes": "Comparison recording for the Zed issue: VS Code (identified by Outline/Timeline panes, 'WSL: Ubuntu' status, 'Open Chat / Show All Commands' watermark). Small text; menu edges clear at contact-sheet scale."
+}

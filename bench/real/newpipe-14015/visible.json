@@ -1,0 +1,18 @@
+{
+ "recording": "recording.mp4",
+ "reviewer": "claude, from frames and the issue text",
+ "control": true,
+ "shows_bug": "no",
+ "steps": [
+  {"t": "00:00.0", "action": "Android, YouTube app home (Vietnamese UI), first item a news video '6 ô tô tông liên hoàn trên cầu Phú Mỹ...' from Báo Tuổi Trẻ"},
+  {"t": "00:02.2", "action": "opens the item's three-dot menu, taps 'Chia sẻ' (share); share sheet (04.0-06.2), then the full Android chooser (07.0-08.0) with NewPipe in the app list"},
+  {"t": "00:09.0", "action": "NewPipe chooser dialog: 'Trình phát video' (video player) highlighted, buttons 'CHỈ MỘT LẦN' / 'LUÔN LUÔN'; dialog closes (10.2)"},
+  {"t": "00:10.8", "action": "NewPipe opens (red splash), loading spinner (11.0-13.8)"},
+  {"t": "00:14.0", "action": "NewPipe video page for the same news video (Báo Tuổi Trẻ, 35,559 views); player buffers (14.5-17.5)"},
+  {"t": "00:17.8", "action": "video plays (night street footage, moving trucks) until the end (23.8); recorder controls appear at 23.0"}
+ ],
+ "actual": "A regular (non-kids) news video shared from the YouTube app to NewPipe's video player loads and plays normally (17.8-23.8). No error page, no 'Nội dung không khả dụng' screen.",
+ "decisive": null,
+ "not_visible": ["any YouTube Kids video", "the NewPipe error page / Guru Meditation report", "NewPipe and Android versions"],
+ "notes": "This recording is the comparison case from the issue ('a regular video plays'); the failing kids videos are in recording-2/recording-3. Marked control=true on that basis, since source.json bug_in is null. 1080x1920 phone capture with 'Recorded by Mobizen' watermark."
+}

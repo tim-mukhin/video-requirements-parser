@@ -1,0 +1,23 @@
+{
+  "id": "tbandroid-10575",
+  "url": "https://github.com/thunderbird/thunderbird-android/issues/10575",
+  "kind": "github",
+  "licence": "GitHub issue attachment (user content, no explicit licence); private testing only",
+  "long": false,
+  "platform": "phone (Thunderbird for Android 17.0b3, LineageOS, Fairphone 3)",
+  "files": [
+    {
+      "file": "recording.mp4",
+      "source": "https://github.com/user-attachments/assets/321b0b2c-7bb4-46ba-8860-f967cdf3282b",
+      "origin": "issue body by da5nsy",
+      "duration_s": 54.1,
+      "resolution": "1080x2160",
+      "has_audio_track": true,
+      "speech": "none (silent audio track)"
+    }
+  ],
+  "bug_in": "the only recording",
+  "description": "With 'after deleting or moving a message: show next message', deleting or archiving often returns to the message list instead.",
+  "expected_report": "The setting is to show the next message after delete/move. The user deletes or archives messages; about half the time the app glitches back to the message list instead of opening the next message. The reporter later notes the next message gets marked as read even though it is not shown.",
+  "difficulty": "Hidden precondition (a setting not visible in the recording), intermittent, fast transitions."
+}

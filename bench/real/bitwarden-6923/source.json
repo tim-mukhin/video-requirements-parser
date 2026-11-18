@@ -1,0 +1,23 @@
+{
+  "id": "bitwarden-6923",
+  "url": "https://github.com/bitwarden/clients/issues/6923",
+  "kind": "github",
+  "licence": "GitHub issue attachment (user content, no explicit licence); private testing only",
+  "long": false,
+  "platform": "desktop (Bitwarden desktop on macOS 14, menu bar mode)",
+  "files": [
+    {
+      "file": "recording.mp4",
+      "source": "https://github.com/bitwarden/clients/assets/26471657/c8e4d52b-8862-4f23-a0fe-f068ea74949d",
+      "origin": "issue body by D3m3rion",
+      "duration_s": 17.8,
+      "resolution": "1280x800",
+      "has_audio_track": true,
+      "speech": "no speech (noise only; Whisper produces hallucinated words on it)"
+    }
+  ],
+  "bug_in": "the only recording",
+  "description": "Clicking the menu bar icon twice quickly does not close the Bitwarden window, or closes it without returning focus.",
+  "expected_report": "Bitwarden runs in the menu bar only. Clicking the menu bar icon opens the window and moves focus; clicking it again right away should close it and return focus to the previous app (QuickTime Player). Actual: the window stays open, and around 00:09 it closes but focus stays on Bitwarden instead of QuickTime.",
+  "difficulty": "Tiny menu bar icon, fast double action, the bug is partly about focus (which app is active), visible only in the menu bar app name."
+}

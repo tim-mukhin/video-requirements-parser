@@ -1,0 +1,17 @@
+{
+ "recording": "recording.webm",
+ "reviewer": "claude, from frames and the issue text",
+ "control": false,
+ "shows_bug": "yes",
+ "steps": [
+  {"t": "00:00.8", "action": "GNOME Shell calendar popover open on February, today (03) highlighted"},
+  {"t": "00:02.7", "action": "activates the greyed adjacent-month day 31 (January) in the first row; the view switches to January"},
+  {"t": "00:04.9", "action": "activates the adjacent-month day 01 (February) in January's last row; the view switches to February"},
+  {"t": "00:07.0", "action": "selects 02 in the same month (focus ring on 02), then moves focus left with the keyboard to 01 (00:07.8) and to 31 of January (00:08.0)"},
+  {"t": "00:08.8", "action": "activates 31; the view switches to January"}
+ ],
+ "actual": "Each time a day of the adjacent month is activated the new month is shown with that day carrying a focus ring (31 at 00:02.8, 01 at 00:05.0, 31 at 00:08.8); one frame later, when the event dots appear under the days (00:03.0, 00:05.2, 00:09.0), the ring is gone and the day is only grey-selected. Within the same month the ring on 02 stays from 00:07.0 to 00:07.8.",
+ "decisive": "00:08.8 -> 00:09.0: January appears with a focus ring on 31, the event dots load and the ring disappears while the pointer is not moving",
+ "not_visible": ["which keys are pressed (only inferred from the focus ring moving 02 -> 01 -> 31 while the pointer stays still); the first two month switches may be mouse clicks"],
+ "notes": "Zoomed capture of the calendar only. Mouse pointer moves around in the first half, so hover highlights mix with selection; the focus ring is a thin blue outline, easy to miss. Actual duration ~10.3 s."
+}

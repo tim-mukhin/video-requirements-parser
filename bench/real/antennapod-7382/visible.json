@@ -1,0 +1,18 @@
+{
+  "recording": "recording.mp4",
+  "reviewer": "claude, from frames and the issue text",
+  "control": false,
+  "shows_bug": "no",
+  "steps": [
+    {"t": "00:00.0", "action": "AntennaPod player screen, episode '242. Danger With A Stranger: Stalking Robin' (Strictly Stalking) playing at 00:41:56 of 00:56:38"},
+    {"t": "00:28.8", "action": "taps the pause button; playback stops at 00:42:25"}
+  ],
+  "actual": "Only the static player screen is visible. The position counter advances one second per second without any jump: 00:41:56 at 00:00.0, 00:42:10 at 00:13.2, 00:42:23 at 00:26.2, 00:42:25 at 00:28.2; then the user pauses (00:28.8) and the counter stays at 00:42:25 until the end (00:30.5). No seek or rewind is performed on screen.",
+  "decisive": null,
+  "not_visible": [
+    "the skip itself - it is in the audio only; the on-screen counter shows continuous playback through 42:23",
+    "rewinding and reproducing the skip at the same place",
+    "background noise the reporter apologises for (audio)"
+  ],
+  "notes": "Static screen for 30 s; the only moving element is the position counter and progress bar. A tap ripple on the pause button is visible at 00:28.8. Everything about the bug is audible, not visible."
+}

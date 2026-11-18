@@ -1,0 +1,21 @@
+{
+  "recording": "recording.mp4",
+  "reviewer": "claude, from frames and the issue text",
+  "control": false,
+  "shows_bug": "yes",
+  "steps": [
+    {"t": "00:00.0", "action": "Firefox Nightly for Android, homepage with the main menu open; the menu has a 'VPN' row with an On/Off toggle (On), and the signed-in account row"},
+    {"t": "00:00.5", "action": "taps the VPN toggle repeatedly: Off, then On (00:04.2), Off, On (00:06.7)"},
+    {"t": "00:08.2", "action": "closes the menu, opens the tab tray and the mullvad.net tab ('Privacy is for the people')"},
+    {"t": "00:13.3", "action": "opens the site/trust panel from the address bar ('Firefox is on guard', Enhanced Tracking Protection, VPN row) and toggles VPN off and on several times (until about 00:20)"},
+    {"t": "00:25.0", "action": "opens the page menu on mullvad.net (Back/Forward/Share/Refresh, VPN row, Bookmark page, Find in page, Desktop site) and toggles VPN off and on many times until the end (00:45)"}
+  ],
+  "actual": "When the toggle goes from Off to On, the pill sometimes reads 'Connecting...' for a single video frame (about 25 ms at ~40 fps) and then 'On': at about 00:04.2 and 00:06.7 (homepage menu), 00:15.7 (trust panel), 00:27.8, 00:32.5 and 00:41.1 (page menu). It is not readable at normal viewing speed and is missed entirely at 4 fps sampling. On other Off -> On taps no 'Connecting' frame was found. While VPN is on, the mullvad.net page banner keeps saying it is not using Mullvad VPN (that is page content, not the toggle).",
+  "decisive": "native frames ~00:04.12 / 00:04.17 / 00:04.20: VPN pill 'Off' -> 'Connecting...' (one frame) -> 'On'",
+  "not_visible": [
+    "the wait of a few seconds before tapping vs rapid taps (the user taps quickly in most cases; timing intent is not stated on screen)",
+    "the address-bar VPN badge intermediate state - not checked frame by frame",
+    "the sign-in to the built-in VPN (only an account row in the menu)"
+  ],
+  "notes": "526x1170, no audio, variable frame rate ~40 fps. The 'Connecting...' frames were found by OCR over every native frame and checked visually; OCR may miss some, so the list of occurrences may be incomplete. Three menus look alike (homepage menu, trust panel, page menu)."
+}

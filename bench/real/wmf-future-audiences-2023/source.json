@@ -1,0 +1,23 @@
+{
+  "id": "wmf-future-audiences-2023",
+  "url": "https://commons.wikimedia.org/wiki/File:Recording_of_discussion_-_WMF_Annual_Plan_2023-34_-_regarding_Future_Audiences.webm",
+  "kind": "commons",
+  "licence": "CC BY-SA 4.0",
+  "long": true,
+  "platform": "meeting recording (public video call about the WMF annual plan)",
+  "files": [
+    {
+      "file": "recording.webm",
+      "source": "https://upload.wikimedia.org/wikipedia/commons/e/e3/Recording_of_discussion_-_WMF_Annual_Plan_2023-34_-_regarding_Future_Audiences.webm?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+      "origin": "Wikimedia Commons file",
+      "duration_s": 3693.1,
+      "resolution": "1418x898",
+      "has_audio_track": true,
+      "speech": "speech (en), checked on a 2-min sample from 600 s"
+    }
+  ],
+  "bug_in": "the only recording",
+  "description": "Public conversation about the 'Future Audiences' part of the WMF Annual Plan 2023-24.",
+  "expected_report": "Which topics and proposals were discussed, questions from participants, what was stated as plan vs open question; slides if shown.",
+  "difficulty": "Long call, many voices, mostly discussion."
+}

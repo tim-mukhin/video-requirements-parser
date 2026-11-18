@@ -1,0 +1,32 @@
+{
+  "id": "zed-64366",
+  "url": "https://github.com/zed-industries/zed/issues/64366",
+  "kind": "github",
+  "licence": "GitHub issue attachment (user content, no explicit licence); private testing only",
+  "long": false,
+  "platform": "desktop (Zed 1.20.2 on Windows 10, plus VS Code for comparison)",
+  "files": [
+    {
+      "file": "recording-1.mp4",
+      "source": "https://github.com/user-attachments/assets/1be8db2d-65d0-4213-a7e9-912fa5cb3c80",
+      "origin": "issue body by Valley-15",
+      "duration_s": 36.5,
+      "resolution": "1918x1126",
+      "has_audio_track": true,
+      "speech": "no speech (noise only; Whisper produces hallucinated words on it)"
+    },
+    {
+      "file": "recording-2.mp4",
+      "source": "https://github.com/user-attachments/assets/64ada05e-3a50-4241-8619-97ae03de8342",
+      "origin": "issue body by Valley-15",
+      "duration_s": 26.6,
+      "resolution": "1918x1128",
+      "has_audio_track": true,
+      "speech": "no speech (noise only; Whisper produces hallucinated words on it)"
+    }
+  ],
+  "bug_in": "recording-1 and recording-2 come from the issue body; one shows Zed (bug), the other VS Code (correct behaviour for comparison). Which is which is not stated in text.",
+  "description": "Project Panel context menu opened near the bottom of the window is clipped by the window edge.",
+  "expected_report": "Right-clicking a file or folder near the bottom of Zed's Project Panel opens a context menu that runs past the bottom edge of the window, so the lower items are cut off. Expected: the menu flips upward or repositions to stay fully visible, as VS Code does for the same action.",
+  "difficulty": "Dark theme, two apps (Zed and VS Code) shown for comparison, the evidence is what is missing at the window edge."
+}

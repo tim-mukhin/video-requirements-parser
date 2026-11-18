@@ -1,0 +1,23 @@
+{
+  "id": "joplin-16462",
+  "url": "https://github.com/laurent22/joplin/issues/16462",
+  "kind": "github",
+  "licence": "GitHub issue attachment (user content, no explicit licence); private testing only",
+  "long": false,
+  "platform": "phone (Joplin mobile on iOS)",
+  "files": [
+    {
+      "file": "recording.mp4",
+      "source": "https://github.com/user-attachments/assets/ed622031-968a-4f5c-8971-ff3797f75071",
+      "origin": "issue body by personalizedrefrigerator",
+      "duration_s": 9.7,
+      "resolution": "1170x2532",
+      "has_audio_track": true,
+      "speech": "none (silent audio track)"
+    }
+  ],
+  "bug_in": "the only recording",
+  "description": "The 'Hide keyboard' button does nothing while the search field has focus.",
+  "expected_report": "With the search panel open and the search field focused, tapping the 'Hide keyboard' button leaves the keyboard visible. Expected: the keyboard is dismissed.",
+  "difficulty": "10 s, tap marks only, the evidence is the keyboard staying."
+}

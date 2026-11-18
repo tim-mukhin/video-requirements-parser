@@ -1,0 +1,18 @@
+{
+ "recording": "recording.gif",
+ "reviewer": "claude, from frames and the issue text",
+ "control": false,
+ "shows_bug": "yes",
+ "steps": [
+  {"t": "00:01.0", "action": "Settings > Encryption: clicks 'Set up recovery'"},
+  {"t": "00:02.5", "action": "clicks Continue on 'Set up recovery'"},
+  {"t": "00:04.5", "action": "copies the recovery key, clicks Continue"},
+  {"t": "00:07.0", "action": "pastes the key (Cmd+V shown) into 'Enter your recovery key to confirm'"},
+  {"t": "00:08.0", "action": "clicks 'Finish set up' repeatedly, about six times between 08.0 and 11.0 (the recorder's red click dot on the button); the button stays enabled"},
+  {"t": "00:11.5", "action": "a 'Recovery key - Make sure nobody can see this screen!' modal asks for the key; the author clicks Cancel (about 18.5-19.0)"}
+ ],
+ "actual": "After the repeated clicks a 'Recovery key' modal asking for the key opens at 11.5. Cancel gives 'Failed to set up secret storage - Error: Secret storage access canceled' (19.5); OK, and the 'Recovery key' modal opens again (21.5); Cancel, the same error (23.0); the modal opens a third time (24.0); Cancel, the error a third time (25.0); OK returns to Encryption settings at 25.5. The modals repeat once per extra click.",
+ "decisive": "00:19.5-25.0: 'Failed to set up secret storage / Secret storage access canceled' and the 'Recovery key' modal alternate three times after the repeated 'Finish set up' clicks at 08.0-11.0, while 'Finish set up' stayed clickable",
+ "not_visible": ["that finishing takes seconds (no spinner shown; the delay is only implied by the clicks)", "the browser and app version"],
+ "notes": "GIF 2710x1838 at about 2 fps of content; clicks are visible as a red dot drawn by the recorder; the exact number of clicks is approximate."
+}

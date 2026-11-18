@@ -1,0 +1,17 @@
+{
+ "recording": "recording.mp4",
+ "reviewer": "claude, from frames and the issue text",
+ "control": false,
+ "shows_bug": "yes",
+ "steps": [
+  {"t": "00:00.0", "action": "Firefox with collapsed vertical tabs on google.com"},
+  {"t": "00:01.2", "action": "moves the cursor to the left edge: sidebar expands over the page (tabs 'Google', 'New Tab' visible), page layout unchanged"},
+  {"t": "00:01.7", "action": "moves the cursor away: sidebar collapses (01.70-01.87)"},
+  {"t": "00:02.5", "action": "hovers again: sidebar expands (02.53-03.00)"},
+  {"t": "00:03.0", "action": "moves away: sidebar collapses (03.03-03.17); page stays still to the end (05.0)"}
+ ],
+ "actual": "Expanding the sidebar overlays the page without changing it. At each collapse, exactly one frame shows the page laid out wider: in frame 00:01.70 and frame 00:03.03 the Google logo, search box and 'Gmail Images' are shifted right and the 'Sign in' button is cut off at the right window edge; the next frame (01.73, 03.07) is back to the normal layout while the sidebar finishes collapsing.",
+ "decisive": "00:01.70 (and again 00:03.03): single frame where the Google page content is shifted right and 'Sign in' is cut off, between two frames with the normal layout",
+ "not_visible": ["the 'expand sidebar on hover' setting itself (only its effect)", "Firefox version"],
+ "notes": "5 s clip at 30 fps; the reflow lasts one frame, invisible at 4 fps sampling, found only by viewing every frame. Cursor is small."
+}
